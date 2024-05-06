@@ -5,12 +5,12 @@ defmodule Krug.MixProject do
 
   def project do
     [
-      app: :krug,
+      app: :neurotick,
       version: "0.0.1",
       elixir: "~> 1.13",
       source_url: @project_url,
       homepage_url: @project_url,
-      name: "Krug",
+      name: "Neurotick",
       description: "Common Neural Network functionalities to improve a TWEANN mechanism.",
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
