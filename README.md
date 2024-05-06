@@ -1,19 +1,18 @@
-# Krug
+# Neurotick
 
-**A Utilitary package functionalities (Mnesia|Sanitizer|Ecto|Bamboo SMTP mail) 
-modules for improve a secure performatic development.**
+**Common Neural Network functionalities to improve a TWEANN mechanism..**
 
 ## Installation
 
-The package can be installed by adding `krug` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `neurotick` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:krug, "~> 1.1.45"}
+    {:neurotick, "~> 0.0.1"}
   ]
 end
 ```
 
-The docs can be found at [https://hexdocs.pm/krug](https://hexdocs.pm/krug).
+The docs can be found at [https://hexdocs.pm/neurotick](https://hexdocs.pm/neurotick).
 
