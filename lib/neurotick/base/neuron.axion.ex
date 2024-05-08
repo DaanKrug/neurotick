@@ -1,11 +1,92 @@
-defmodule Neurotick.Base.NeuronBase do
+defmodule Neurotick.Base.NeuronAxion do
+
+  @callback spawn_sensor_module() :: Pid.t()
+  
+  @callback new() :: Pid.t()
 
   defmacro __using__(_opts) do
   
     quote do
     
       alias Neurotick.Base.OperationParam
-
+      alias Krug.EtsUtil
+      
+      @tablename_sensors :neurotick_ets_sensors
+      
+      def sensor_receptor() do
+        receive do
+          ({:config,number_of_sensors})
+            -> config(number_of_sensors)
+          ({:start})
+            -> read_signals()
+          ({sensor_pid,signals_array})
+            -> received_signal(sensor_pid,signals_array)
+        end
+      end
+      
+      defp config(number_of_sensors) do
+        EtsUtil.new(@tablename_sensors)
+	    children = number_of_sensors
+	                 |> create_sensors()
+	    EtsUtil.store_in_cache(@tablename_sensors,Kernel.self(),children)             
+	  end
+	  
+	  defp create_sensors(number_of_sensors,children \\ []) do
+	    cond do
+	      (length(children) >= number_of_sensors)
+	        -> children
+	      true
+	        -> number_of_sensors
+	             |> create_sensors(
+	                  [
+	                    spawn_sensor_module()
+	                      | children
+	                  ]
+	                )
+	    end
+	  end
+	  
+      def read_signals(signals_array \\ []) do
+        pids = sensor_pids()
+        position = signals_array
+                     |> length()
+        cond do
+          (position >= length(pids))
+            -> signals_array
+                 |> Enum.reverse()
+                 |> process_signals()
+          true
+            -> pids
+                 |> Enum.at(position)
+                 |> request_signal(signals_array)
+        end
+      end
+      
+      def request_signal(sensor_pid,signals_array) do
+        Process.send(sensor_pid,{Kernel.self(),signals_array},[:noconnect])
+      end
+      
+      defp received_signal(sensor_pid,signals_array) do
+        [
+          "received_signal",
+          sensor_pid,
+          signals_array
+        ]
+          |> IO.inspect()
+        read_signals(signals_array)
+      end
+      
+      defp sensor_pids() do
+        children = EtsUtil.read_from_cache(@tablename_sensors,Kernel.self())
+        cond do
+          (nil == children)
+            -> []
+          true
+            -> children
+        end
+      end
+	 
+      # process calculations
 	  # operation_params = neuron
 	
 	  def process_signals(signals_array,bias \\ 0,operation \\ "*") do

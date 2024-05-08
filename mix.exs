@@ -1,4 +1,4 @@
-defmodule Krug.MixProject do
+defmodule Neurotick.MixProject do
   use Mix.Project
   
   @project_url "https://github.com/DaanKrug/neurotick"
@@ -32,7 +32,8 @@ defmodule Krug.MixProject do
     [
       {:earmark, "~> 1.4.13", only: :dev, runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.1", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
+      {:krug, "~> 1.1.45"}
     ]
   end
   

@@ -108,5 +108,15 @@ defmodule Neurotick.SimpleNeuronTest do
     assert expected_activation_result_1 == expected_activation_result_3
   end
   
+  test "[start_link(init_args)]" do
+    pid = Neurotick.SimpleNeuron.new()
+    
+    Process.send(pid,{:config,3},[:noconnect])
+    
+    Process.send(pid,{:start},[:noconnect])
+    
+    :timer.sleep(600000)
+  end
+  
 end
   

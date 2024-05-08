@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :krug, author: "Daniel Augusto Krug"
+config :neurotick, author: "Daniel Augusto Krug"
 
   
 
