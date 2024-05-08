@@ -113,7 +113,11 @@ defmodule Neurotick.SimpleNeuronTest do
     
     Process.send(pid,{:config,3},[:noconnect])
     
-    Process.send(pid,{:start},[:noconnect])
+    Process.send(pid,{:read_signals},[:noconnect])
+    
+    Process.send(pid,{:read_signals},[:noconnect])
+    
+    Process.send(pid,{:read_signals},[:noconnect])
     
     :timer.sleep(600000)
   end
