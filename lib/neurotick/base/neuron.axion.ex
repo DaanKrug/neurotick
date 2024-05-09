@@ -1,9 +1,5 @@
 defmodule Neurotick.Base.NeuronAxion do
 
-  @callback spawn_sensor_module() :: Pid.t()
-  
-  @callback new() :: Pid.t()
-
   defmacro __using__(_opts) do
   
     quote do
@@ -13,11 +9,16 @@ defmodule Neurotick.Base.NeuronAxion do
       
       @tablename_sensors :neurotick_ets_sensors
       @tablename_sensors_data :neurotick_ets_sensors_data
+      @tablename_activation_functions :neurotick_ets_activation_functions
+      @tablename_actuators :neurotick_ets_actuators
+      @tablename_config :neurotick_ets_config
+      
       
       def sensor_receptor() do
         receive do
-          ({:config,number_of_sensors})
-            -> config(number_of_sensors)
+          ({:config,params_array})
+            -> params_array
+                 |> config()
           ({:read_signals})
             -> read_signals()
           ({sensor_pid,signals_array})
@@ -26,30 +27,27 @@ defmodule Neurotick.Base.NeuronAxion do
         sensor_receptor()  
       end
       
-      defp config(number_of_sensors) do
+      defp config(params_array) do
+        [
+          sensors_array,
+          activation_functions_array,
+          actuators_array,
+          bias,
+          operation,
+          debugg
+        ] = params_array
         EtsUtil.new(@tablename_sensors)
         EtsUtil.new(@tablename_sensors_data)
-	    children = number_of_sensors
-	                 |> create_sensors()
-	    EtsUtil.store_in_cache(@tablename_sensors,Kernel.self(),children)             
+        EtsUtil.new(@tablename_activation_functions)
+        EtsUtil.new(@tablename_actuators)
+        EtsUtil.new(@tablename_config)
+	    EtsUtil.store_in_cache(@tablename_sensors,Kernel.self(),sensors_array)
+	    EtsUtil.store_in_cache(@tablename_activation_functions,Kernel.self(),activation_functions_array)
+	    EtsUtil.store_in_cache(@tablename_actuators,Kernel.self(),actuators_array)
+	    EtsUtil.store_in_cache(@tablename_config,Kernel.self(),[bias,operation,debugg])             
 	  end
 	  
-	  defp create_sensors(number_of_sensors,children \\ []) do
-	    cond do
-	      (length(children) >= number_of_sensors)
-	        -> children
-	      true
-	        -> number_of_sensors
-	             |> create_sensors(
-	                  [
-	                    spawn_sensor_module()
-	                      | children
-	                  ]
-	                )
-	    end
-	  end
-	  
-      def read_signals() do
+      defp read_signals() do
         pids = sensor_pids()
         signals_array = get_sensors_data()
         position = signals_array 
@@ -66,7 +64,7 @@ defmodule Neurotick.Base.NeuronAxion do
         end
       end
       
-      def request_signal(sensor_pid) do
+      defp request_signal(sensor_pid) do
         Process.send(sensor_pid,{Kernel.self()},[:noconnect])
       end
       
@@ -99,43 +97,91 @@ defmodule Neurotick.Base.NeuronAxion do
         end
       end
       
+      defp get_activation_functions() do
+        functions = EtsUtil.read_from_cache(@tablename_activation_functions,Kernel.self())
+        cond do
+          (nil == functions)
+            -> []
+          true
+            -> functions
+        end
+      end
+      
+      defp get_actuators() do
+        actuators = EtsUtil.read_from_cache(@tablename_actuators,Kernel.self())
+        cond do
+          (nil == actuators)
+            -> []
+          true
+            -> actuators
+        end
+      end
+      
+      defp get_config() do
+        EtsUtil.read_from_cache(@tablename_config,Kernel.self())
+      end
+      
       defp clear_sensor_data() do
         EtsUtil.remove_from_cache(@tablename_sensors_data,Kernel.self())
       end
 	 
       # process calculations
-	  # operation_params = neuron
 	
-	  def process_signals(signals_array,bias \\ 0,operation \\ "*") do
-	    ["process_signals => ",signals_array,bias]
-          |> IO.inspect()
+	  defp process_signals(signals_array) do
+	    [bias,operation,debugg] = get_config()
+	    
+        debugg_info(
+          ["process_signals => ",signals_array,bias],
+          debugg
+        )   
+        
         clear_sensor_data()
 	    operation_params = add_all_operations(signals_array,operation)
 	    inputs = extract_inputs(signals_array)
 	    result = calculate_inputs(inputs,operation_params)
-	    [result + bias,operation_params,signals_array,bias]
+	    
+	    debugg_info(
+	      ["result => ",result,"result + bias => ",result + bias],
+	      debugg
+	    )
+	    result = get_activation_functions()
+	               |> process_activations(result + bias)
+	               
+	    debugg_info(
+	      ["result => ",result,"actuators => ",get_actuators()],
+	      debugg
+	    )
+	    
+	    result
 	  end
 	  
-	  def process_activations(activation_functions,signals_result) do
+	  defp debugg_info(info,debugg) do
 	    cond do
-	      (Enum.empty?(activation_functions))
-	        -> signals_result
+	      (!debugg)
+	        -> :ok
 	      true
-	        -> activation_functions
-	             |> process_activation(signals_result)
+	        -> info
+	             |> IO.inspect()
 	    end
 	  end
 	  
-	  defp process_activation(activation_functions,signals_result) do
-	    [result,operation_params,signals_array,bias] = signals_result
+	  defp process_activations(activation_functions,result) do
+	    cond do
+	      (Enum.empty?(activation_functions))
+	        -> result
+	      true
+	        -> activation_functions
+	             |> process_activation(result)
+	    end
+	  end
+	  
+	  defp process_activation(activation_functions,result) do
 	    function = activation_functions
 	                 |> hd()
 	    activation_result = function.process_activation(result)
 	    activation_functions
 	      |> tl()
-	      |> process_activations(
-	           [activation_result,operation_params,signals_array,bias]
-	         )
+	      |> process_activations(activation_result)
 	  end
 	  
 	  defp extract_inputs(signals_array,inputs \\ []) do
@@ -190,18 +236,6 @@ defmodule Neurotick.Base.NeuronAxion do
 	        | operation_params
 	    ]
 	  end
-	  
-	  defp remove_operation(id,operation_params) do
-	    operation_params
-	      |> clone([],[id])
-	  end
-	  
-	  defp replace_operation(id,operation_params,new_operation_param) do
-	    [
-	      new_operation_param
-	        | remove_operation(id,operation_params)
-	    ]
-	  end
 	
 	  defp calculate_inputs(inputs,operation_params,result \\ 0) do
 	    cond do
@@ -226,50 +260,6 @@ defmodule Neurotick.Base.NeuronAxion do
 	         )
 	  end
 	  
-	  defp clone(operation_params,keep_ids,exclude_ids \\ []) do
-	    cond do
-	      (Enum.empty?(operation_params)
-	        or (Enum.empty?(keep_ids) 
-	          and Enum.empty?(exclude_ids)))
-	            -> []
-	      true
-	        -> operation_params
-	             |> clone_operation_params(keep_ids,exclude_ids) 
-	    end
-	  end
-	  
-	  defp clone_operation_params(operation_params,keep_ids,exclude_ids,cloned_operation_params \\ []) do
-	    cond do
-	      (Enum.empty?(operation_params))
-	        -> cloned_operation_params
-	      true
-	        -> operation_params
-	             |> clone_operation_params2(keep_ids,exclude_ids,cloned_operation_params)
-	    end
-	  end
-	  
-	  defp clone_operation_params2(operation_params,keep_ids,exclude_ids,cloned_operation_params) do
-	    operation_param = operation_params
-	                        |> hd()
-	    [id,operation,weight] = operation_param
-	    cond do
-	      (!(Enum.empty?(exclude_ids))
-	        and Enum.member?(exclude_ids,id))
-	          -> operation_params 
-	               |> tl()
-	               |> clone_operation_params(keep_ids,exclude_ids,cloned_operation_params)
-	      (!(Enum.member?(keep_ids,id))
-	        and Enum.empty?(exclude_ids))
-	          -> operation_params 
-	               |> tl()
-	               |> clone_operation_params(keep_ids,exclude_ids,cloned_operation_params)
-	      true
-	        -> operation_params 
-	             |> tl()
-	             |> clone_operation_params(keep_ids,exclude_ids,[operation_param | cloned_operation_params])
-	    end
-	  end
-
     end
   
   end
