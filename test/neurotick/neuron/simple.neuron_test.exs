@@ -1,13 +1,15 @@
 defmodule Neurotick.SimpleNeuronTest do
   use ExUnit.Case
   
-  doctest Neurotick.SimpleNeuron
+  doctest Neurotick.Example.SimpleNeuron
   
-  alias Neurotick.SimpleSensor
+  alias Neurotick.Example.SimpleSensor
+  alias Neurotick.Example.SimpleNeuron
+  alias Neurotick.Example.TanhFunction
   
   
   test "[single neuron]" do
-    pid = Neurotick.SimpleNeuron.new()
+    pid = SimpleNeuron.new()
     
     sensors_array = [
       SimpleSensor.new(),
@@ -17,7 +19,7 @@ defmodule Neurotick.SimpleNeuronTest do
     ]
     
     activation_functions = [
-      Neurotick.TanhFunction
+      TanhFunction
     ]
     
     actuators_array = []
@@ -26,7 +28,7 @@ defmodule Neurotick.SimpleNeuronTest do
     
     operation = "*"
     
-    debugg = false
+    debugg = true
     
     params_array = [
       sensors_array,

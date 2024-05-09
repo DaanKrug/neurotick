@@ -1,4 +1,4 @@
-defmodule Neurotick.TanhFunction do
+defmodule Neurotick.Example.TanhFunction do
 
   @behaviour Neurotick.Base.ActivationFunctionBehaviour
   

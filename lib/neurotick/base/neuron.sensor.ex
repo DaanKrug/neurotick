@@ -10,9 +10,9 @@ defmodule Neurotick.Base.NeuronSensor do
         
       def sense() do
         receive do
-          ({axion_pid})
+          ({neuron_pid})
             -> Process.send(
-                 axion_pid,
+                 neuron_pid,
                  {Kernel.self(),read_sensor_signals()},
                  [:noconnect]
                )

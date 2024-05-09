@@ -1,4 +1,4 @@
-defmodule Neurotick.SimpleSensor do
+defmodule Neurotick.Example.SimpleSensor do
 
   use Neurotick.Base.NeuronSensor
   
