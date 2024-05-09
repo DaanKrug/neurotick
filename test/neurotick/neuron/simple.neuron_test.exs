@@ -5,6 +5,7 @@ defmodule Neurotick.SimpleNeuronTest do
   
   alias Neurotick.Example.SimpleSensor
   alias Neurotick.Example.SimpleNeuron
+  alias Neurotick.Example.SimpleActuator
   alias Neurotick.Example.TanhFunction
   
   
@@ -22,7 +23,11 @@ defmodule Neurotick.SimpleNeuronTest do
       TanhFunction
     ]
     
-    actuators_array = []
+    actuators_array = [
+      SimpleActuator.new(),
+      SimpleActuator.new(),
+      SimpleActuator.new()
+    ]
     
     bias = 2.5
     

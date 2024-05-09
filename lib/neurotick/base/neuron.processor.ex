@@ -24,10 +24,15 @@ defmodule Neurotick.Base.NeuronProcessor do
     result = NeuronStorage.get_activation_functions(pid)
                |> process_activations(result + bias)
                
+    
+    actuators = NeuronStorage.get_actuators(pid)
     debugg_info(
-      ["result => ",result,"actuators => ",NeuronStorage.get_actuators(pid)],
+      ["result => ",result,"actuators => ",actuators],
       debugg
     )
+    
+    actuators
+      |> call_actuators(result)
     
     result
   end
@@ -59,6 +64,25 @@ defmodule Neurotick.Base.NeuronProcessor do
     activation_functions
       |> tl()
       |> process_activations(activation_result)
+  end
+  
+  defp call_actuators(actuators,result) do
+    cond do
+      (Enum.empty?(actuators))
+        -> :ok
+      true
+        -> actuators
+             |> call_actuator(result)
+    end
+  end
+  
+  defp call_actuator(actuators,result) do
+    actuator_pid = actuators
+                     |> hd()
+    Process.send(actuator_pid,{Kernel.self(),result},[:noconnect])
+    actuators
+      |> tl()
+      |> call_actuators(result)
   end
 	
 end
