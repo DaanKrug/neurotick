@@ -80,5 +80,12 @@ defmodule Neurotick.Base.NeuronStorage do
   def clear_sensor_data(pid) do
     EtsUtil.remove_from_cache(@tablename_sensors_data,pid)
   end
+  
+  def get_sensors_and_sensor_signals_received(pid) do
+    [
+      get_sensor_pids(pid),
+      get_sensors_data(pid)
+    ]         
+  end
 	
 end

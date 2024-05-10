@@ -14,37 +14,45 @@ defmodule Neurotick.Base.Neuron do
             -> params_array
                  |> NeuronStorage.config(Kernel.self())
           ({:read_signals})
-            -> read_signals()
+            -> Kernel.self()
+                 |> NeuronStorage.get_sensor_pids()
+                 |> read_sensor_signals()
           ({sensor_pid,signals_array})
             -> received_signal(sensor_pid,signals_array)
         end
         axion_receptor()  
       end
       
-      defp read_signals() do
-        pids = NeuronStorage.get_sensor_pids(Kernel.self())
-        signals_array = NeuronStorage.get_sensors_data(Kernel.self())
-        position = signals_array 
-                     |> length()
+      defp read_sensor_signals(sensor_pids) do
         cond do
-          (position >= length(pids))
-            -> signals_array
-                 |> Enum.reverse()
-                 |> NeuronProcessor.process_signals(Kernel.self())
+          (Enum.empty?(sensor_pids))
+            -> :ok
           true
-            -> pids
-                 |> Enum.at(position)
-                 |> request_signal()
+            -> sensor_pids
+                 |> request_sensor_data()
         end
       end
       
-      defp request_signal(sensor_pid) do
-        Process.send(sensor_pid,{Kernel.self()},[:noconnect])
+      defp request_sensor_data(sensor_pids) do
+        sensor_pids
+          |> hd()
+          |> Process.send({Kernel.self()},[:noconnect])
+        sensor_pids
+          |> tl()
+          |> read_sensor_signals()
       end
       
       defp received_signal(sensor_pid,signal_array) do
         NeuronStorage.store_sensor_data(signal_array,Kernel.self())
-        read_signals()
+        [pids,signals_array] = NeuronStorage.get_sensors_and_sensor_signals_received(Kernel.self())
+        cond do
+          (signals_array |> length() >= length(pids))
+            -> signals_array
+                 |> Enum.reverse()
+                 |> NeuronProcessor.process_signals(Kernel.self())
+          true
+            -> :waiting_sensor_signal
+        end
       end
       
     end
