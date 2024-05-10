@@ -27,7 +27,6 @@ defmodule Neurotick.MixProject do
     ]
   end
 
-
   defp deps do
     [
       {:earmark, "~> 1.4.13", only: :dev, runtime: false},

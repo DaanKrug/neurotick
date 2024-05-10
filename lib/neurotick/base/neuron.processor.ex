@@ -1,15 +1,17 @@
 defmodule Neurotick.Base.NeuronProcessor do
 
+  use Neurotick.Base.NeuronLogger
+
   alias Neurotick.Base.NeuronOperationParam
   alias Neurotick.Base.NeuronStorage
       
 
   def process_signals(signals_array,pid) do
-    [bias,operation,debugg] = NeuronStorage.get_config(pid)
+    [bias,operation,_] = NeuronStorage.get_config(pid)
     
     debugg_info(
-      ["process_signals => ",signals_array,bias],
-      debugg
+      pid,
+      ["process_signals => ",signals_array,bias]
     )   
     
     NeuronStorage.clear_sensor_data(pid)
@@ -18,33 +20,23 @@ defmodule Neurotick.Base.NeuronProcessor do
     result = NeuronOperationParam.calculate_inputs(inputs,operation_params)
     
     debugg_info(
-      ["result => ",result,"result + bias => ",result + bias],
-      debugg
+      pid,
+      ["result => ",result,"result + bias => ",result + bias]
     )
     result = NeuronStorage.get_activation_functions(pid)
                |> process_activations(result + bias)
                
     
-    actuators = NeuronStorage.get_actuators(pid)
+    actuators = NeuronStorage.get_actuator_pids(pid)
     debugg_info(
-      ["result => ",result,"actuators => ",actuators],
-      debugg
+      pid,
+      ["result => ",result,"actuators => ",actuators]
     )
     
     actuators
       |> call_actuators(result)
     
     result
-  end
-  
-  defp debugg_info(info,debugg) do
-    cond do
-      (!debugg)
-        -> :ok
-      true
-        -> info
-             |> IO.inspect()
-    end
   end
   
   defp process_activations(activation_functions,result) do
@@ -83,6 +75,24 @@ defmodule Neurotick.Base.NeuronProcessor do
     actuators
       |> tl()
       |> call_actuators(result)
+  end
+  
+  def terminate_all(neuron_pid,pids) do
+    cond do
+      (Enum.empty?(pids))
+        -> :ok
+      true
+        -> neuron_pid
+             |> terminate_pid(pids)
+    end
+  end
+  
+  defp terminate_pid(neuron_pid,pids) do
+    pids
+      |> hd()
+      |> Process.send({neuron_pid,:terminate},[:noconnect])
+    neuron_pid
+      |> terminate_all(pids |> tl())
   end
 	
 end

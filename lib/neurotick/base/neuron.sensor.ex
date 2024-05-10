@@ -7,16 +7,23 @@ defmodule Neurotick.Base.NeuronSensor do
   defmacro __using__(_opts) do
   
     quote do
+    
+      use Neurotick.Base.NeuronLogger
         
       def sense() do
         receive do
+          ({neuron_pid,:terminate})
+            -> neuron_pid
+                 |> debugg_info(["Terminated Sensor => ",Kernel.self()])
           ({neuron_pid})
-            -> Process.send(
-                 neuron_pid,
-                 {Kernel.self(),read_sensor_signals()},
-                 [:noconnect]
-               )
+            -> neuron_pid
+                 |> do_sense()
         end
+      end
+      
+      defp do_sense(neuron_pid) do
+        neuron_pid
+          |> Process.send({Kernel.self(),read_sensor_signals()},[:noconnect])
         sense()
       end
       

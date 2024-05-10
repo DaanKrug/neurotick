@@ -63,7 +63,7 @@ defmodule Neurotick.Base.NeuronStorage do
     end
   end
   
-  def get_actuators(pid) do
+  def get_actuator_pids(pid) do
     actuators = EtsUtil.read_from_cache(@tablename_actuators,pid)
     cond do
       (nil == actuators)
