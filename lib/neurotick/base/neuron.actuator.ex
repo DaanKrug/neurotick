@@ -1,28 +1,48 @@
 defmodule Neurotick.Base.NeuronActuator do
 
-  @callback activated(source_pid :: Pid.t(), data :: Float.t()) :: Float.t()
+  @callback activated(signals_array :: Float.t()) :: Float.t()
     
   defmacro __using__(_opts) do
   
     quote do
     
       use Neurotick.Base.NeuronLogger
+
+      alias Neurotick.Base.NeuronStorage
         
       def actuate() do
         receive do
-          ({neuron_pid,:terminate})
-            -> neuron_pid
+          ({:terminate})
+            -> Kernel.self()
                  |> debugg_info(["Terminated Actuator => ",Kernel.self()]) 
-          ({neuron_pid,data})
-            -> neuron_pid
-                 |> do_actuate(data)
+          ({:signal_array,signal_array})
+            -> signal_array
+                 |> accumulate()
         end
       end
       
-      defp do_actuate(neuron_pid,data) do
-        neuron_pid
-          |> activated(data)
+      defp accumulate(signal_array) do
+        signal_array 
+          |> NeuronStorage.store_sensor_data(Kernel.self())
+        expected_inputs = Kernel.self()
+                            |> NeuronStorage.get_actuator_expected_inputs()
+        signals_array = Kernel.self()
+                          |> NeuronStorage.get_sensors_data()
+        cond do
+          (length(signals_array) >= expected_inputs)
+            -> signals_array
+                 |> do_actuate()
+          true
+            -> :ok
+        end
         actuate()
+      end
+      
+      defp do_actuate(signals_array) do
+        signals_array
+          |> activated()
+        Kernel.self()
+          |> NeuronStorage.clear_sensor_data()
       end
         
     end

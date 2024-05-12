@@ -9,11 +9,10 @@ defmodule Neurotick.Example.SimpleActuator do
   end
     
   @impl Neurotick.Base.NeuronActuator
-  def activated(source_pid,data) do
+  def activated(signals_array) do
     [
-      "activated => ",
-      source_pid,
-      data 
+      "activated(signals_array) => ",
+      signals_array 
     ]
       |> IO.inspect()
   end

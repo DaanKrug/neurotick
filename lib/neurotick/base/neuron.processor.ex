@@ -69,30 +69,32 @@ defmodule Neurotick.Base.NeuronProcessor do
   end
   
   defp call_actuator(actuators,result) do
+    signal_array = [result,1]
     actuator_pid = actuators
                      |> hd()
-    Process.send(actuator_pid,{Kernel.self(),result},[:noconnect])
+    Process.send(actuator_pid,{:signal_array,signal_array},[:noconnect])
     actuators
       |> tl()
       |> call_actuators(result)
   end
   
-  def terminate_all(neuron_pid,pids) do
+  def terminate_all(pids) do
     cond do
       (Enum.empty?(pids))
         -> :ok
       true
-        -> neuron_pid
-             |> terminate_pid(pids)
+        -> pids
+             |> terminate_pid()
     end
   end
   
-  defp terminate_pid(neuron_pid,pids) do
+  defp terminate_pid(pids) do
     pids
       |> hd()
-      |> Process.send({neuron_pid,:terminate},[:noconnect])
-    neuron_pid
-      |> terminate_all(pids |> tl())
+      |> Process.send({:terminate},[:noconnect])
+    pids
+      |> tl()
+      |> terminate_all()
   end
 	
 end

@@ -9,22 +9,51 @@ defmodule Neurotick.Base.NeuronSensor do
     quote do
     
       use Neurotick.Base.NeuronLogger
+      
+      alias Neurotick.Base.NeuronStorage
         
       def sense() do
         receive do
-          ({neuron_pid,:terminate})
-            -> neuron_pid
+          ({:terminate})
+            -> Kernel.self()
                  |> debugg_info(["Terminated Sensor => ",Kernel.self()])
-          ({neuron_pid})
-            -> neuron_pid
-                 |> do_sense()
+          ({:config,params_array})
+            -> params_array
+                 |> config_params()
+          ({:do_sense})
+            -> do_sense()
         end
       end
       
-      defp do_sense(neuron_pid) do
-        neuron_pid
-          |> Process.send({Kernel.self(),read_sensor_signals()},[:noconnect])
+      defp config_params(params_array) do
+        params_array
+          |> NeuronStorage.config_sensor(Kernel.self())
         sense()
+      end
+      
+      defp do_sense() do
+        NeuronStorage.get_neuron_pids(Kernel.self())
+          |> send_signal_to_neurons(read_sensor_signals())
+        sense()
+      end
+      
+      defp send_signal_to_neurons(neuron_pids,signal_array) do
+        cond do
+          (Enum.empty?(neuron_pids))
+            -> :ok
+          true
+            -> neuron_pids
+                 |> send_signal_to_neuron(signal_array)
+        end
+      end
+      
+      defp send_signal_to_neuron(neuron_pids,signal_array) do
+        neuron_pids
+          |> hd()
+          |> Process.send({:signal_array,signal_array},[:noconnect])
+        neuron_pids
+          |> tl()
+          |> send_signal_to_neurons(signal_array)
       end
       
       defp read_sensor_signals() do
