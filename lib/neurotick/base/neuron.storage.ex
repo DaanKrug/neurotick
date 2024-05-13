@@ -9,6 +9,8 @@ defmodule Neurotick.Base.NeuronStorage do
   @tablename_actuators :neurotick_ets_actuators
   @tablename_actuators_expected_inputs :neurotick_ets_actuators_expected_inputs
   @tablename_config :neurotick_ets_config
+  @tablename_neural_network :neurotick_ets_neural_network
+
 
   def config_storage() do
     EtsUtil.new(@tablename_sensors)
@@ -18,6 +20,7 @@ defmodule Neurotick.Base.NeuronStorage do
     EtsUtil.new(@tablename_actuators)
     EtsUtil.new(@tablename_actuators_expected_inputs)
     EtsUtil.new(@tablename_config)
+    EtsUtil.new(@tablename_neural_network)
   end
   
   def config_sensor(params_array,pid) do
@@ -108,6 +111,16 @@ defmodule Neurotick.Base.NeuronStorage do
       true
         -> data
     end
+  end
+  
+  def store_network_element(network_id,element_id,element) do
+    id = "#{network_id}_#{element_id}"
+    EtsUtil.store_in_cache(@tablename_neural_network,id,element)
+  end
+  
+  def get_network_element(network_id,element_id) do
+    id = "#{network_id}_#{element_id}"
+    EtsUtil.read_from_cache(@tablename_neural_network,id)
   end
   
   def get_activation_functions(pid) do

@@ -9,6 +9,7 @@ defmodule Neurotick.SimpleNeuronTest do
   alias Neurotick.Example.SimpleActuator
   alias Neurotick.Example.TanhFunction
   alias Neurotick.Base.NeuronStorage
+  alias Neurotick.Base.NeuronNetwork
   
   
   test "[single neuron]" do
@@ -307,8 +308,55 @@ defmodule Neurotick.SimpleNeuronTest do
     Process.send(neuron_7,{:terminate},[:noconnect])
     Process.send(neuron_8,{:terminate},[:noconnect])
     
-    :timer.sleep(15000)
- 
+  # end
+  
+  # test "[NeuronNetwork]" do
+    # :timer.sleep(45000)
+    "testing neuron network ... "
+      |> IO.inspect()
+      
+    neurons_array_0 = [
+      SimpleNeuron.new(),
+      SimpleNeuron.new(),
+      SimpleNeuron.new(),
+      SimpleNeuron.new()
+    ]
+    
+    neurons_array_1 = [
+      SimpleNeuron.new(),
+      SimpleNeuron.new(),
+      SimpleNeuron.new(),
+      SimpleNeuron.new()
+    ]
+    
+    sensors_array = [
+      SimpleSensor.new(),
+      SimpleSensor.new(),
+      SimpleSensor.new(),
+      SimpleSensor.new()
+    ]
+    
+    activation_functions = [
+      TanhFunction
+    ]
+    
+    actuators_array = [
+      SimpleActuator.new(),
+      SimpleActuator.new(),
+      SimpleActuator.new()
+    ]
+    
+    network_id = NeuronNetwork.start_network()
+    NeuronNetwork.add_sensors(network_id,sensors_array)
+    NeuronNetwork.add_actuators(network_id,actuators_array)
+    NeuronNetwork.add_neurons(network_id,neurons_array_0,0)
+    NeuronNetwork.add_neurons(network_id,neurons_array_1,1)
+    NeuronNetwork.config_neuron_layer(network_id,0,activation_functions,2.5,"*",true)    
+    NeuronNetwork.config_neuron_layer(network_id,1,activation_functions,0,"*",true)
+    network_id
+      |> NeuronNetwork.process_signals()
+    network_id
+      |> NeuronNetwork.stop_network()
   end
   
 end
