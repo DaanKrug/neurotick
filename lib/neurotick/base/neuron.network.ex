@@ -12,6 +12,7 @@ defmodule Neurotick.Base.NeuronNetwork do
     NeuronStorage.config_storage()
     network_id = SanitizerUtil.generate_random(50)
     NeuronStorage.store_network_element(network_id,@layers_id,0)
+    network_id
   end
   
   def stop_network(network_id) do
@@ -68,11 +69,26 @@ defmodule Neurotick.Base.NeuronNetwork do
         |> get_neurons_or_actuators(layer_number),
       bias,
       operation,
-      debugg
+      debugg,
+      network_id
+        |> get_actuators_expected_inputs(layer_number)
     ]
     network_id
       |> get_neurons_from_layer(layer_number)
       |> add_neuron_layer(params_array_neuron_layer)
+  end
+  
+  defp get_actuators_expected_inputs(network_id,layer_number) do
+    cond do
+      (layer_number == 0)
+        -> network_id
+             |> NeuronStorage.get_network_element(@sensors_id)
+             |> length()
+      true
+        -> network_id
+             |> get_neurons_from_layer(layer_number)
+             |> length()
+    end
   end
   
   defp get_neurons_or_actuators(network_id,layer_number) do
@@ -80,7 +96,7 @@ defmodule Neurotick.Base.NeuronNetwork do
     cond do
       (layer_number < (layers - 1))
         -> network_id
-             |> get_neurons_from_layer(layer_number - 1)
+             |> get_neurons_from_layer(layer_number + 1)
       true
         -> network_id
              |> NeuronStorage.get_network_element(@actuators_id)

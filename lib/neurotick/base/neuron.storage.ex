@@ -26,7 +26,7 @@ defmodule Neurotick.Base.NeuronStorage do
   def config_sensor(params_array,pid) do
     [neurons_array,debugg] = params_array
     EtsUtil.store_in_cache(@tablename_neurons,pid,neurons_array)  
-    EtsUtil.store_in_cache(@tablename_config,pid,[nil,nil,debugg])           
+    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])           
   end
   
   def config_neuron(params_array,pid) do
@@ -36,37 +36,39 @@ defmodule Neurotick.Base.NeuronStorage do
       actuators_array,
       bias,
       operation,
-      debugg
+      debugg,
+      actuators_expected_inputs
     ] = params_array
     EtsUtil.store_in_cache(@tablename_sensors,pid,sensors_array)
     EtsUtil.store_in_cache(@tablename_activation_functions,pid,activation_functions_array)
     EtsUtil.store_in_cache(@tablename_actuators,pid,actuators_array)
     EtsUtil.store_in_cache(@tablename_config,pid,[bias,operation,debugg])   
-    config_actuators(actuators_array,debugg)          
+    actuators_array
+      |> config_actuators(debugg,actuators_expected_inputs)          
   end
   
-  defp config_actuators(pids,debugg) do
+  defp config_actuators(pids,debugg,expected_inputs) do
     cond do
       (Enum.empty?(pids))
         -> :ok
       true
         -> pids
-             |> config_actuator(debugg)
+             |> config_actuator(debugg,expected_inputs)
     end           
   end
   
-  defp config_actuator(pids,debugg) do
+  defp config_actuator(pids,debugg,expected_inputs) do
     pid = pids 
             |> hd()
-    EtsUtil.store_in_cache(@tablename_config,pid,[nil,nil,debugg])  
+    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])  
     EtsUtil.store_in_cache(
       @tablename_actuators_expected_inputs,
       pid,
-      (pid |> get_actuator_expected_inputs()) + 1
+      expected_inputs
     )
     pids
       |> tl()
-      |> config_actuators(debugg)    
+      |> config_actuators(debugg,expected_inputs)    
   end
   
   def get_actuator_expected_inputs(pid) do
