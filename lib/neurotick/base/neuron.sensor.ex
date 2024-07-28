@@ -16,10 +16,10 @@ defmodule Neurotick.Base.NeuronSensor do
       
       @tablename_config :neurotick_ets_config
       
-      def new(debugg) do
+      def new(name,debugg) do
 	    pid = Process.spawn(__MODULE__,:sense,[],[])
 	    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])
-	    NeuronMetadata.store_metadata(pid,__MODULE__)
+	    NeuronMetadata.store_metadata(pid,name,__MODULE__)
 	    pid
 	  end
         
@@ -45,7 +45,7 @@ defmodule Neurotick.Base.NeuronSensor do
       defp do_sense() do
         sensor_signals = read_sensor_signals()
         Kernel.self()
-          |> NeuronMetadata.store_metadata([],sensor_signals)
+          |> NeuronMetadata.update_metadata([],sensor_signals)
         Kernel.self()
           |> NeuronStorage.get_neuron_pids()
           |> send_signal_to_neurons(sensor_signals)

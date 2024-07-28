@@ -1,6 +1,7 @@
 defmodule Neurotick.Base.NeuronStorage do
 
   alias Krug.EtsUtil
+  alias Neurotick.Base.NeuronMetadata
   
   @tablename_metadata :neurotick_ets_metadata
   @tablename_sensors :neurotick_ets_sensors
@@ -26,7 +27,8 @@ defmodule Neurotick.Base.NeuronStorage do
   end
   
   def config_sensor(neurons_array,pid) do
-    EtsUtil.store_in_cache(@tablename_neurons,pid,neurons_array)             
+    EtsUtil.store_in_cache(@tablename_neurons,pid,neurons_array)     
+    NeuronMetadata.update_metadata_bindings(pid,[],neurons_array)        
   end
   
   def config_neuron(params_array,pid) do
@@ -37,6 +39,7 @@ defmodule Neurotick.Base.NeuronStorage do
     ] = params_array
     EtsUtil.store_in_cache(@tablename_sensors,pid,sensors_array)
     EtsUtil.store_in_cache(@tablename_actuators,pid,actuators_array)
+    NeuronMetadata.update_metadata_bindings(pid,sensors_array,actuators_array)
     actuators_array
       |> config_actuators(actuators_expected_inputs)          
   end

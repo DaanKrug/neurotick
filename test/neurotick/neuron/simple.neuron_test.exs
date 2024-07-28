@@ -22,41 +22,41 @@ defmodule Neurotick.SimpleNeuronTest do
     ]
       
     neurons_array_0 = [
-      SimpleNeuron.new(0,activation_functions,2.5,"*",false), #activation_functions,bias,operation,debugg
-      SimpleNeuron.new(0,activation_functions,0,"*",false), #activation_functions,bias,operation,debugg
-      SimpleNeuron.new(0,[],2.5,"*",false), #activation_functions,bias,operation,debugg
-      SimpleNeuron.new(0,[],0,"*",false)  #activation_functions,bias,operation,debugg
+      SimpleNeuron.new("N1",0,activation_functions,2.5,"*",false), #name,layer,activation_functions,bias,operation,debugg
+      SimpleNeuron.new("N2",0,activation_functions,0,"*",false), 
+      SimpleNeuron.new("N3",0,[],2.5,"*",false),
+      SimpleNeuron.new("N4",0,[],0,"*",false)  
     ]
     
     neurons_array_1 = [
-      SimpleNeuron.new(1,activation_functions,0,"*",false),
-      SimpleNeuron.new(1,activation_functions,0,"*",false),
-      SimpleNeuron.new(1,activation_functions,0,"*",false),
-      SimpleNeuron.new(1,activation_functions,0,"*",false)
+      SimpleNeuron.new("N5",1,activation_functions,0,"*",false),
+      SimpleNeuron.new("N6",1,activation_functions,0,"*",false),
+      SimpleNeuron.new("N7",1,activation_functions,0,"*",false),
+      SimpleNeuron.new("N8",1,activation_functions,0,"*",false)
     ]
     
     neurons_array_2 = [
-      SimpleNeuron.new(2,[],0,"*",false),
-      SimpleNeuron.new(2,[],0,"*",false)
+      SimpleNeuron.new("N9",2,[],0,"*",false),
+      SimpleNeuron.new("N10",2,[],0,"*",false)
     ]
     
     neurons_array_3 = [
-      SimpleNeuron.new(3,[],0.5,"*",false),
-      SimpleNeuron.new(3,activation_functions,0,"*",false),
-      SimpleNeuron.new(3,[],0,"*",false)
+      SimpleNeuron.new("N11",3,[],0.5,"*",false),
+      SimpleNeuron.new("N12",3,activation_functions,0,"*",false),
+      SimpleNeuron.new("N13",3,[],0,"*",false)
     ]
     
     sensors_array = [
-      SimpleSensor.new(false), #debugg
-      SimpleSensor.new(false), #debugg
-      SimpleSensor.new(false), #debugg
-      SimpleSensor.new(false)  #debugg
+      SimpleSensor.new("S1",false), #name,debugg
+      SimpleSensor.new("S2",false), 
+      SimpleSensor.new("S3",false), 
+      SimpleSensor.new("S4",false)  
     ]
         
     actuators_array = [
-      SimpleActuator.new(false), #debugg
-      SimpleActuator.new(false), #debugg
-      SimpleActuator.new(false)  #debugg
+      SimpleActuator.new("A1",false), #name,debugg
+      SimpleActuator.new("A2",false), 
+      SimpleActuator.new("A3",false)  
     ]
     
     neurons_array_layers = [
@@ -74,10 +74,13 @@ defmodule Neurotick.SimpleNeuronTest do
     network_id
       |> NeuronNetwork.process_signals()
       
-    NeuronNetwork.debugg(network_id)
+    :timer.sleep(100)
+    
+    # NeuronNetwork.debugg(network_id,nil)
+    NeuronNetwork.debugg(network_id,"./network_struct.txt")
     
       
-    :timer.sleep(2000)
+    :timer.sleep(1000)
     
     network_id
       |> NeuronNetwork.stop_network()

@@ -9,10 +9,10 @@ defmodule Neurotick.Base.NeuronLayer do
   @layers_id "layers"
   
   
-  def debugg_layers(network_id) do
+  def debugg_layers(network_id,file_path) do
     network_id
       |> NeuronStorage.get_network_element(@layers_id)
-      |> debugg_layer(network_id)
+      |> debugg_layer(network_id,file_path)
   end
   
   def terminate_all_layers(network_id) do
@@ -123,21 +123,21 @@ defmodule Neurotick.Base.NeuronLayer do
       |> terminate_layers(layer_number - 1)
   end
   
-  defp debugg_layer(max_layer_number,network_id,current \\ 0) do
+  defp debugg_layer(max_layer_number,network_id,file_path,current \\ 0) do
     cond do
       (current >= max_layer_number)
         -> :ok
       true
         -> max_layer_number
-             |> debugg_layer2(network_id,current)
+             |> debugg_layer2(network_id,file_path,current)
     end
   end
   
-  defp debugg_layer2(max_layer_number,network_id,current) do
+  defp debugg_layer2(max_layer_number,network_id,file_path,current) do
     network_id 
       |> NeuronUtil.get_neurons_from_layer(current)
-      |> NeuronMetadata.debugg_pids()
-    debugg_layer(max_layer_number,network_id,current + 1)
+      |> NeuronMetadata.debugg_pids(file_path)
+    debugg_layer(max_layer_number,network_id,file_path,current + 1)
   end
   
 end

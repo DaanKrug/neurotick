@@ -29,7 +29,7 @@ defmodule Neurotick.Base.NeuronProcessor do
       ["result => ",result,"actuators => ",actuators]
     )
     pid
-      |> NeuronMetadata.store_metadata(inputs,[result])
+      |> NeuronMetadata.update_metadata(inputs,[result])
     actuators
       |> call_actuators(result)
     result

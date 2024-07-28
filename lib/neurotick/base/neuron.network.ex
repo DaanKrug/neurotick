@@ -48,17 +48,17 @@ defmodule Neurotick.Base.NeuronNetwork do
       |> NeuronCortex.process_signals()
   end
   
-  def debugg(network_id) do
+  def debugg(network_id,file_path \\ nil) do
     sensors = network_id
                 |> NeuronStorage.get_network_element(@sensors_id)
     actuators = network_id
                   |> NeuronStorage.get_network_element(@actuators_id) 
     sensors 
-      |> NeuronMetadata.debugg_pids()
+      |> NeuronMetadata.debugg_pids(file_path)
     network_id
-      |> NeuronLayer.debugg_layers()
+      |> NeuronLayer.debugg_layers(file_path)
     actuators
-      |> NeuronMetadata.debugg_pids()
+      |> NeuronMetadata.debugg_pids(file_path)
   end
     
 end

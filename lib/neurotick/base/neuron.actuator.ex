@@ -14,10 +14,10 @@ defmodule Neurotick.Base.NeuronActuator do
       
       @tablename_config :neurotick_ets_config
       
-      def new(debugg) do
+      def new(name,debugg) do
 	    pid = Process.spawn(__MODULE__,:actuate,[],[])
 	    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])
-	    NeuronMetadata.store_metadata(pid,__MODULE__)
+	    NeuronMetadata.store_metadata(pid,name,__MODULE__)
 	    pid
 	  end
         
@@ -53,7 +53,7 @@ defmodule Neurotick.Base.NeuronActuator do
         signals_array
           |> activated()
         Kernel.self()
-          |> NeuronMetadata.store_metadata(signals_array,[])
+          |> NeuronMetadata.update_metadata(signals_array,[])
         Kernel.self()
           |> NeuronStorage.clear_sensor_data()
       end
