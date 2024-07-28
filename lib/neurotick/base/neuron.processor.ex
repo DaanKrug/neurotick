@@ -65,7 +65,7 @@ defmodule Neurotick.Base.NeuronProcessor do
   end
   
   defp call_actuator(actuators,result) do
-    signal_array = [result,1]
+    signal_array = [result,1] # weight = 1, because required for [value,weight] pair, when actuator is a neuron
     actuator_pid = actuators
                      |> hd()
     Process.send(actuator_pid,{:signal_array,signal_array},[:noconnect])

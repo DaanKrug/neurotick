@@ -1,6 +1,7 @@
 defmodule Neurotick.Base.NeuronNetwork do
 
   alias Krug.SanitizerUtil
+  alias Krug.MapUtil
   alias Neurotick.Base.NeuronStorage
   alias Neurotick.Base.NeuronLayer
   alias Neurotick.Base.NeuronUtil
@@ -46,6 +47,45 @@ defmodule Neurotick.Base.NeuronNetwork do
   def process_signals(network_id) do
     network_id
       |> NeuronCortex.process_signals()
+  end
+  
+  def extract_output(network_id) do
+    network_id
+      |> NeuronStorage.get_network_element(@actuators_id)
+      |> extract_output_actuators()
+  end
+  
+  defp extract_output_actuators(actuator_pids,results \\ []) do
+    cond do
+      (Enum.empty?(actuator_pids))
+        -> results
+             |> Enum.reverse()
+      true
+        -> actuator_pids
+             |> tl()
+             |> extract_output_actuators(
+                  [
+                    actuator_pids 
+                      |> hd() 
+                      |> NeuronMetadata.read_metadata() 
+                      |> MapUtil.get(:input)
+                      |> remove_result_weights()
+                      | results
+                  ]
+                )
+    end
+  end
+  
+  defp remove_result_weights(actuator_inputs,result_array \\ []) do
+    cond do
+      (Enum.empty?(actuator_inputs))
+        -> result_array
+             |> Enum.reverse()
+      true
+        -> actuator_inputs
+             |> tl()
+             |> remove_result_weights([actuator_inputs |> hd() |> hd() | result_array])
+    end
   end
   
   def debugg(network_id,file_path \\ nil) do

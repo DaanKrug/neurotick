@@ -77,8 +77,13 @@ defmodule Neurotick.SimpleNeuronTest do
     :timer.sleep(100)
     
     # NeuronNetwork.debugg(network_id,nil)
-    NeuronNetwork.debugg(network_id,"./network_struct.txt")
+    # NeuronNetwork.debugg(network_id,"./network_struct.txt")
     
+    results = network_id 
+                |> NeuronNetwork.extract_output()
+    
+    results
+      |> IO.inspect()
       
     :timer.sleep(1000)
     
