@@ -11,6 +11,17 @@ defmodule Neurotick.Base.NeuronSensor do
       use Neurotick.Base.NeuronLogger
       
       alias Neurotick.Base.NeuronStorage
+      alias Neurotick.Base.NeuronMetadata
+      alias Krug.EtsUtil
+      
+      @tablename_config :neurotick_ets_config
+      
+      def new(debugg) do
+	    pid = Process.spawn(__MODULE__,:sense,[],[])
+	    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])
+	    NeuronMetadata.store_metadata(pid,__MODULE__)
+	    pid
+	  end
         
       def sense() do
         receive do
@@ -32,8 +43,12 @@ defmodule Neurotick.Base.NeuronSensor do
       end
       
       defp do_sense() do
-        NeuronStorage.get_neuron_pids(Kernel.self())
-          |> send_signal_to_neurons(read_sensor_signals())
+        sensor_signals = read_sensor_signals()
+        Kernel.self()
+          |> NeuronMetadata.store_metadata([],sensor_signals)
+        Kernel.self()
+          |> NeuronStorage.get_neuron_pids()
+          |> send_signal_to_neurons(sensor_signals)
         sense()
       end
       

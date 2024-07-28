@@ -9,6 +9,17 @@ defmodule Neurotick.Base.NeuronActuator do
       use Neurotick.Base.NeuronLogger
 
       alias Neurotick.Base.NeuronStorage
+      alias Neurotick.Base.NeuronMetadata
+      alias Krug.EtsUtil
+      
+      @tablename_config :neurotick_ets_config
+      
+      def new(debugg) do
+	    pid = Process.spawn(__MODULE__,:actuate,[],[])
+	    EtsUtil.store_in_cache(@tablename_config,pid,[0,nil,debugg])
+	    NeuronMetadata.store_metadata(pid,__MODULE__)
+	    pid
+	  end
         
       def actuate() do
         receive do
@@ -41,6 +52,8 @@ defmodule Neurotick.Base.NeuronActuator do
       defp do_actuate(signals_array) do
         signals_array
           |> activated()
+        Kernel.self()
+          |> NeuronMetadata.store_metadata(signals_array,[])
         Kernel.self()
           |> NeuronStorage.clear_sensor_data()
       end

@@ -4,9 +4,6 @@ defmodule Neurotick.Example.SimpleSensor do
   
   @behaviour Neurotick.Base.NeuronSensor
   
-  def new() do
-    Process.spawn(__MODULE__,:sense,[],[])
-  end
     
   @impl Neurotick.Base.NeuronSensor
   def read_sensor_data() do

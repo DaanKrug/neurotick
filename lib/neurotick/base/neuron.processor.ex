@@ -4,38 +4,34 @@ defmodule Neurotick.Base.NeuronProcessor do
 
   alias Neurotick.Base.NeuronOperationParam
   alias Neurotick.Base.NeuronStorage
+  alias Neurotick.Base.NeuronMetadata
       
 
   def process_signals(signals_array,pid) do
     [bias,operation,_] = NeuronStorage.get_config(pid)
-    
     debugg_info(
       pid,
       ["process_signals => ",signals_array,bias]
     )   
-    
     NeuronStorage.clear_sensor_data(pid)
     operation_params = NeuronOperationParam.add_all_operations(signals_array,operation)
     inputs = NeuronOperationParam.extract_inputs(signals_array)
     result = NeuronOperationParam.calculate_inputs(inputs,operation_params)
-    
     debugg_info(
       pid,
       ["result => ",result,"result + bias => ",result + bias]
     )
     result = NeuronStorage.get_activation_functions(pid)
                |> process_activations(result + bias)
-               
-    
     actuators = NeuronStorage.get_actuator_pids(pid)
     debugg_info(
       pid,
       ["result => ",result,"actuators => ",actuators]
     )
-    
+    pid
+      |> NeuronMetadata.store_metadata(inputs,[result])
     actuators
       |> call_actuators(result)
-    
     result
   end
   
