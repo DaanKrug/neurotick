@@ -8,7 +8,7 @@ defmodule Neurotick.Base.NeuronProcessor do
       
 
   def process_signals(signals_array,pid) do
-    [bias,operation,_] = NeuronStorage.get_config(pid)
+    [weight,bias,operation,_] = NeuronStorage.get_config(pid)
     debugg_info(
       pid,
       ["process_signals => ",signals_array,bias]
@@ -31,7 +31,7 @@ defmodule Neurotick.Base.NeuronProcessor do
     pid
       |> NeuronMetadata.update_metadata(inputs,[result])
     actuators
-      |> call_actuators(result)
+      |> call_actuators(result,weight)
     result
   end
   
@@ -54,24 +54,23 @@ defmodule Neurotick.Base.NeuronProcessor do
       |> process_activations(activation_result)
   end
   
-  defp call_actuators(actuators,result) do
+  defp call_actuators(actuators,result,weight) do
     cond do
       (Enum.empty?(actuators))
         -> :ok
       true
         -> actuators
-             |> call_actuator(result)
+             |> call_actuator(result,weight)
     end
   end
   
-  defp call_actuator(actuators,result) do
-    signal_array = [result,1] # weight = 1, because required for [value,weight] pair, when actuator is a neuron
-    actuator_pid = actuators
-                     |> hd()
-    Process.send(actuator_pid,{:signal_array,signal_array},[:noconnect])
+  defp call_actuator(actuators,result,weight) do
+    actuators
+      |> hd()
+      |> Process.send({:signal_array,[result,weight]},[:noconnect])
     actuators
       |> tl()
-      |> call_actuators(result)
+      |> call_actuators(result,weight)
   end
   
   def terminate_all(pids) do

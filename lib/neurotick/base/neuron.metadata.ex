@@ -45,6 +45,7 @@ defmodule Neurotick.Base.NeuronMetadata do
                  |> StringUtil.replace("\",","\",\n\t")
                  |> StringUtil.replace("],","],\n\t")
                  |> StringUtil.replace("}","\n}")
+                 |> StringUtil.replace(",\"",",\n\t\"")
     cond do
       (nil == content)
         -> file_path
@@ -68,13 +69,14 @@ defmodule Neurotick.Base.NeuronMetadata do
     EtsUtil.store_in_cache(@tablename_metadata,pid,metadata)
   end
   
-  def store_metadata(pid,name,type,layer,activation_functions,bias,operation) do
+  def store_metadata(pid,name,type,layer,activation_functions,weight,bias,operation) do
     metadata = %{
       pid: pid,
       name: name,
       type: type,
       layer: layer,
       activation_functions: activation_functions,
+      weight: weight,
       bias: bias,
       operation: operation
     }

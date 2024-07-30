@@ -22,28 +22,28 @@ defmodule Neurotick.SimpleNeuronTest do
     ]
       
     neurons_array_0 = [
-      SimpleNeuron.new("N1",0,activation_functions,2.5,"*",false), #name,layer,activation_functions,bias,operation,debugg
-      SimpleNeuron.new("N2",0,activation_functions,0,"*",false), 
-      SimpleNeuron.new("N3",0,[],2.5,"*",false),
-      SimpleNeuron.new("N4",0,[],0,"*",false)  
+      SimpleNeuron.new("N1",0,activation_functions,1,2.5,"*",false), #name,layer,activation_functions,weight,bias,operation,debugg
+      SimpleNeuron.new("N2",0,activation_functions,1,0,"*",false), 
+      SimpleNeuron.new("N3",0,[],0.5,2.5,"*",false),
+      SimpleNeuron.new("N4",0,[],2,0,"*",false)  
     ]
     
     neurons_array_1 = [
-      SimpleNeuron.new("N5",1,activation_functions,0,"*",false),
-      SimpleNeuron.new("N6",1,activation_functions,0,"*",false),
-      SimpleNeuron.new("N7",1,activation_functions,0,"*",false),
-      SimpleNeuron.new("N8",1,activation_functions,0,"*",false)
+      SimpleNeuron.new("N5",1,activation_functions,1,0,"*",false),
+      SimpleNeuron.new("N6",1,activation_functions,1,0,"*",false),
+      SimpleNeuron.new("N7",1,activation_functions,1,0,"*",false),
+      SimpleNeuron.new("N8",1,activation_functions,1,0,"*",false)
     ]
     
     neurons_array_2 = [
-      SimpleNeuron.new("N9",2,[],0,"*",false),
-      SimpleNeuron.new("N10",2,[],0,"*",false)
+      SimpleNeuron.new("N9",2,[],1,0,"*",false),
+      SimpleNeuron.new("N10",2,[],1,0,"*",false)
     ]
     
     neurons_array_3 = [
-      SimpleNeuron.new("N11",3,[],0.5,"*",false),
-      SimpleNeuron.new("N12",3,activation_functions,0,"*",false),
-      SimpleNeuron.new("N13",3,[],0,"*",false)
+      SimpleNeuron.new("N11",3,[],1,0.5,"*",false),
+      SimpleNeuron.new("N12",3,activation_functions,1,0,"*",false),
+      SimpleNeuron.new("N13",3,[],1,0,"*",false)
     ]
     
     sensors_array = [
@@ -76,8 +76,8 @@ defmodule Neurotick.SimpleNeuronTest do
       
     :timer.sleep(100)
     
-    # NeuronNetwork.debugg(network_id,nil)
-    # NeuronNetwork.debugg(network_id,"./network_struct.txt")
+    NeuronNetwork.debugg(network_id,nil)
+    NeuronNetwork.debugg(network_id,"./network_struct.txt")
     
     results = network_id 
                 |> NeuronNetwork.extract_output()

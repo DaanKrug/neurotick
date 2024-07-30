@@ -7,7 +7,7 @@ defmodule Neurotick.Base.NeuronLogger do
       alias Neurotick.Base.NeuronStorage
     
       defp debugg_info(pid,info) do
-        [_,_,debugg] = NeuronStorage.get_config(pid)
+        [_,_,_,debugg] = NeuronStorage.get_config(pid)
         cond do
           (!debugg)
 	        -> :ok
