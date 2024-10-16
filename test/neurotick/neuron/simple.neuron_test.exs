@@ -16,7 +16,7 @@ defmodule Neurotick.SimpleNeuronTest do
       |> IO.inspect()
       
     network_id = NeuronNetwork.start_network()
-      
+        
     activation_functions = [
       TanhFunction
     ]
@@ -69,20 +69,19 @@ defmodule Neurotick.SimpleNeuronTest do
     NeuronNetwork.config_sensors(network_id,sensors_array)
     NeuronNetwork.config_actuators(network_id,actuators_array)
     NeuronNetwork.config_neurons(network_id,neurons_array_layers)
-    
-    
+ 
     network_id
       |> NeuronNetwork.process_signals()
       
     :timer.sleep(100)
     
-    NeuronNetwork.debugg(network_id,nil)
-    NeuronNetwork.debugg(network_id,"./network_struct.txt")
+    # NeuronNetwork.debugg(network_id,nil)
+    # NeuronNetwork.debugg(network_id,"./network_struct.txt")
     
     results = network_id 
                 |> NeuronNetwork.extract_output()
     
-    results
+    ["results",results]
       |> IO.inspect()
       
     :timer.sleep(1000)

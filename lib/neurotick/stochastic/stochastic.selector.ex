@@ -1,6 +1,6 @@
 defmodule Neurotick.Stochastic.Selector do
 
-  #alias Krug.NumberUtil
+  alias Krug.NumberUtil
   alias Neurotick.Probability.Selector
   
   @meta_pi 314159
@@ -19,10 +19,17 @@ defmodule Neurotick.Stochastic.Selector do
   end
   
   def max_attemps(elements) do
-    elements 
-      |> length() 
-      |> :math.sqrt()
+    total = elements 
+		      |> List.flatten()
+		      |> length() 
+	cond do
+	  (total < 4)
+	    -> 1
+	  true
+	    -> total
+	         |> :math.sqrt()
+	         |> NumberUtil.to_integer()
+	end
   end
-  
   
 end
