@@ -11,7 +11,7 @@ defmodule Neurotick.Stochastic.StochasticMutator do
                                 |> flattify_neurons_names()
                                 |> Selector.select_elements()
     mutated_neurons_array_layer = neurons_array_layer
-                                    |> disturb_selected_neurons_array(neuron_names_to_disturb)
+                                    |> disturb_selected_neurons_array(neuron_names_to_disturb)  
     stochastic_id
       |> NeuronStorage.set_neurons(mutated_neurons_array_layer)
   end
@@ -57,7 +57,8 @@ defmodule Neurotick.Stochastic.StochasticMutator do
   end
 
   defp disturb_neuron_weight(neuron,neuron_names_to_disturb) do
-    [module,name,layer,activation_functions,_weight,bias,operation,debugg] = neuron
+    [module,name,layer,activation_functions,weight,bias,operation,debugg] = neuron
+    weight_perturbation = Selector.choose_weight_perturbation()
     cond do
       (!(Enum.member?(neuron_names_to_disturb,name)))
         -> neuron
@@ -67,7 +68,7 @@ defmodule Neurotick.Stochastic.StochasticMutator do
              name,
              layer,
              activation_functions,
-             Selector.choose_weight_perturbation(),
+             weight + weight_perturbation,
              bias,
              operation,
              debugg
@@ -75,15 +76,39 @@ defmodule Neurotick.Stochastic.StochasticMutator do
     end
   end  
   
-  defp flattify_neurons_names(neurons_array,flat_neurons_array \\ []) do
+  defp flattify_neurons_names(neurons_array_layers,flat_neurons_array_names \\ []) do
+    cond do
+      (Enum.empty?(neurons_array_layers))
+        -> flat_neurons_array_names
+             |> Enum.reverse()
+      true
+        -> neurons_array_layers
+             |> tl()
+             |> flattify_neurons_names(
+                  neurons_array_layers
+                    |> hd()
+                    |> flattify_neurons_names2(flat_neurons_array_names)
+                )
+    end
+  end
+  
+  defp flattify_neurons_names2(neurons_array,flat_neurons_array_names) do
     cond do
       (Enum.empty?(neurons_array))
-        -> flat_neurons_array
+        -> flat_neurons_array_names
              |> Enum.reverse()
       true
         -> neurons_array
              |> tl()
-             |> flattify_neurons_names([neurons_array |> hd() |> tl() |> hd() | flat_neurons_array])
+             |> flattify_neurons_names2(
+                  [
+                    neurons_array 
+                      |> hd() 
+                      |> tl() 
+                      |> hd() 
+                      | flat_neurons_array_names
+                  ]
+                )
     end
   end
 

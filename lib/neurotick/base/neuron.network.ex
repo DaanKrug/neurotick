@@ -76,23 +76,30 @@ defmodule Neurotick.Base.NeuronNetwork do
                       |> hd() 
                       |> NeuronMetadata.read_metadata() 
                       |> MapUtil.get(:input)
-                      |> remove_result_weights()
+                      |> calculate_result_weights()
                       | results
                   ]
                 )
     end
   end
   
-  defp remove_result_weights(actuator_inputs,result_array \\ []) do
+  defp calculate_result_weights(actuator_inputs,result_array \\ []) do
     cond do
       (Enum.empty?(actuator_inputs))
         -> result_array
              |> Enum.reverse()
       true
         -> actuator_inputs
-             |> tl()
-             |> remove_result_weights([actuator_inputs |> hd() |> hd() | result_array])
+             |> calculate_result_weights2(result_array)
     end
+  end
+  
+  defp calculate_result_weights2(actuator_inputs,result_array \\ []) do
+    [value,weight] = actuator_inputs 
+                       |> hd() 
+    actuator_inputs
+      |> tl()
+      |> calculate_result_weights([(value * weight) | result_array])
   end
   
   def debugg(network_id,file_path \\ nil) do

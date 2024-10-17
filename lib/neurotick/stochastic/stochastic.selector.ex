@@ -5,7 +5,7 @@ defmodule Neurotick.Stochastic.Selector do
   
   @meta_pi 314159
   @meta_pi_range (314159 * 2) + 1
-  @meta_pi_divider 10000
+  @meta_pi_divider 1000000
   
   def select_elements(elements) do
     probability = 1 / (elements |> length() |> :math.sqrt())

@@ -57,11 +57,12 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
     network_id
       |> NeuronNetwork.process_signals()
     :timer.sleep(100)
-    network_id 
-      |> NeuronNetwork.extract_output()
+    result = network_id 
+               |> NeuronNetwork.extract_output()
     :timer.sleep(100)
     network_id
       |> NeuronNetwork.stop_network()
+    result
   end
     
 

@@ -2,19 +2,11 @@ defmodule Neurotick.Stochastic.StochasticMath do
 
   @biggest_diff 1000000
   
-  
   def compare_results(expected_result,current_result,new_result) do
     diff_1 = [expected_result]
                |> absolute_diff_array([current_result])
     diff_2 = [expected_result]
                |> absolute_diff_array([new_result])
-    [
-      current_result,
-      new_result,
-      diff_1,
-      diff_2
-    ]
-      |> IO.inspect()
     cond do
       (diff_1 < diff_2)
         -> 0
@@ -28,8 +20,8 @@ defmodule Neurotick.Stochastic.StochasticMath do
       (nil == array_a
         or nil == array_b)
           -> @biggest_diff
-      (!(:array.is_array(array_a))
-        or !(:array.is_array(array_b)))
+      (!(:erlang.is_list(array_a))
+        or !(:erlang.is_list(array_b)))
           -> @biggest_diff
       (Enum.empty?(array_a)
         or Enum.empty?(array_b))
@@ -47,7 +39,7 @@ defmodule Neurotick.Stochastic.StochasticMath do
       (Enum.empty?(array_a))
         -> absolute_diff
              |> module_diff()
-      (array_a |> hd() |> :array.is_array())
+      (array_a |> hd() |> :erlang.is_list())
         -> array_a
              |> tl()
              |> absolute_diff_array2(
