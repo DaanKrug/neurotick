@@ -71,6 +71,13 @@ defmodule Neurotick.Stochastic.StochasticMath do
     (number_a - number_b)
   end
   
+  #
+  defp round(number) do
+    precision = 2
+    pow = MathUtil.pow(10,precision)
+    round(number * pow) / pow
+  end
+  
   defp module_diff(absolute_diff) do
     cond do
       (absolute_diff < 0)

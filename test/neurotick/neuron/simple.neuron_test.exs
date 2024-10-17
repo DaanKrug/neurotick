@@ -200,10 +200,10 @@ defmodule Neurotick.SimpleNeuronTest do
       |> NeuronNetwork.stop_network()
    
    
-    ["neurons_array_layers", neurons_array_layers]
-      |> IO.inspect()
-    ["mutated_neurons", mutated_neurons]
-      |> IO.inspect()
+    #["neurons_array_layers", neurons_array_layers]
+    #  |> IO.inspect()
+    #["mutated_neurons", mutated_neurons]
+    #  |> IO.inspect()
  
     ["original_result",original_result]
       |> IO.inspect()
