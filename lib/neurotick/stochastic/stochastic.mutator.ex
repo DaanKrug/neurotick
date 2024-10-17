@@ -5,36 +5,30 @@ defmodule Neurotick.Stochastic.StochasticMutator do
   
   
   def mutate_neurons(stochastic_id) do
-    neurons_array = stochastic_id
+    neurons_array_layer = stochastic_id
                       |> NeuronStorage.get_neurons()
-    neuron_names_to_disturb = neurons_array
+    neuron_names_to_disturb = neurons_array_layer
                                 |> flattify_neurons_names()
                                 |> Selector.select_elements()
-    mutated_neurons = neurons_array
-                        |> disturb_selected_neurons_array(neuron_names_to_disturb)
-    [
-      "neurons_array",
-      neurons_array,
-      "mutated_neurons",
-      mutated_neurons
-    ]
-      |> IO.inspect()
+    mutated_neurons_array_layer = neurons_array_layer
+                                    |> disturb_selected_neurons_array(neuron_names_to_disturb)
     stochastic_id
-      |> NeuronStorage.set_neurons(mutated_neurons)
+      |> NeuronStorage.set_neurons(mutated_neurons_array_layer)
   end
 
-  defp disturb_selected_neurons_array(neurons_array,neuron_names_to_disturb,mutated_neurons \\ []) do
+  defp disturb_selected_neurons_array(neurons_array_layer,neuron_names_to_disturb,mutated_neurons \\ []) do
     cond do
-      (Enum.empty?(neurons_array))
+      (Enum.empty?(neurons_array_layer))
         -> mutated_neurons
              |> Enum.reverse()
       true
-        -> neurons_array
+        -> neurons_array_layer
              |> tl()
              |> disturb_selected_neurons_array(
                   neuron_names_to_disturb,
                   [
-                    neurons_array
+                    neurons_array_layer
+                      |> hd()
                       |> disturb_selected_neurons(neuron_names_to_disturb)
                       | mutated_neurons
                   ] 
