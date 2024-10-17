@@ -10,16 +10,16 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   
   
   # config
-  def config(id,sensors_array,neurons_array,actuators_array) do
+  def config(id,sensors_array,neurons_array,actuators_array,max_attemps) do
   	EtsUtil.new(:"#{@tablename_sensors_layer <> id}")
   	EtsUtil.new(:"#{@tablename_neuron_layers <> id}")
     EtsUtil.new(:"#{@tablename_actuators_layer <> id}")
     id 
-      |> init_sensors(sensors_array)
+      |> init_sensors(sensors_array,max_attemps)
     id
-      |> init_actuators(actuators_array)
+      |> init_actuators(actuators_array,max_attemps)
     id
-      |> init_neurons(neurons_array)
+      |> init_neurons(neurons_array,max_attemps)
   end
   
   # lef attemps
@@ -156,7 +156,7 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   end
   
   # initialization
-  defp init_sensors(id,sensors_array) do
+  defp init_sensors(id,sensors_array,max_attemps) do
     tablename = :"#{@tablename_sensors_layer <> id}" 
     tablename
       |> EtsUtil.remove_from_cache("sensors_array")
@@ -168,13 +168,19 @@ defmodule Neurotick.Stochastic.NeuronStorage do
       |> EtsUtil.store_in_cache("sensors_array",sensors_array)
     tablename
       |> EtsUtil.store_in_cache("sensors_array_bkp",sensors_array)
-    tablename
-      |> EtsUtil.store_in_cache("sensors_array_max_attemps",sensors_array |> Selector.max_attemps())
+    cond do
+      (nil == max_attemps)
+        -> tablename
+             |> EtsUtil.store_in_cache("sensors_array_max_attemps",sensors_array |> Selector.max_attemps())
+      true
+        -> tablename
+             |> EtsUtil.store_in_cache("sensors_array_max_attemps",max_attemps)
+    end
     tablename
       |> increment_current_attemps("sensors_array_current_attemps")
   end
   
-  defp init_actuators(id,actuators_array) do
+  defp init_actuators(id,actuators_array,max_attemps) do
     tablename = :"#{@tablename_actuators_layer <> id}"
     tablename
       |> EtsUtil.remove_from_cache("actuators_array")
@@ -186,13 +192,19 @@ defmodule Neurotick.Stochastic.NeuronStorage do
       |> EtsUtil.store_in_cache("actuators_array",actuators_array)
     tablename
       |> EtsUtil.store_in_cache("actuators_array_bkp",actuators_array)
-    tablename
-      |> EtsUtil.store_in_cache("actuators_array_max_attemps",actuators_array |> Selector.max_attemps())
+    cond do
+      (nil == max_attemps)
+        -> tablename
+             |> EtsUtil.store_in_cache("actuators_array_max_attemps",actuators_array |> Selector.max_attemps())
+      true
+        -> tablename
+             |> EtsUtil.store_in_cache("actuators_array_max_attemps",max_attemps)
+    end
     tablename
       |> increment_current_attemps("actuators_array_current_attemps")
   end
   
-  defp init_neurons(id,neurons_array) do
+  defp init_neurons(id,neurons_array,max_attemps) do
     tablename = :"#{@tablename_neuron_layers <> id}"
     tablename
       |> EtsUtil.remove_from_cache("neurons_array")
@@ -204,8 +216,14 @@ defmodule Neurotick.Stochastic.NeuronStorage do
       |> EtsUtil.store_in_cache("neurons_array",neurons_array)
     tablename
       |> EtsUtil.store_in_cache("neurons_array_bkp",neurons_array)
-    tablename
-      |> EtsUtil.store_in_cache("neurons_array_max_attemps",neurons_array |> Selector.max_attemps())
+    cond do
+      (nil == max_attemps)
+        -> tablename
+             |> EtsUtil.store_in_cache("neurons_array_max_attemps",neurons_array |> Selector.max_attemps())
+      true
+        -> tablename
+             |> EtsUtil.store_in_cache("neurons_array_max_attemps",max_attemps)
+    end
     tablename
       |> increment_current_attemps("neurons_array_current_attemps")
   end

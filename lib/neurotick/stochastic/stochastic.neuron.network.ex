@@ -6,9 +6,9 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   alias Neurotick.Stochastic.StochasticMutator
   
   
-  def config(stochastic_id,sensors_array,neurons_array,actuators_array) do
+  def config(stochastic_id,sensors_array,neurons_array,actuators_array,max_attemps \\ nil) do
     stochastic_id
-      |> NeuronStorage.config(sensors_array,neurons_array,actuators_array)
+      |> NeuronStorage.config(sensors_array,neurons_array,actuators_array,max_attemps)
   end
   
   def run_stochastic_neurons_mutation(stochastic_id,expected_result) do
@@ -53,13 +53,13 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
     NeuronNetwork.config_sensors(network_id,sensors_array)
     NeuronNetwork.config_actuators(network_id,actuators_array)
     NeuronNetwork.config_neurons(network_id,neurons_array_layers)
-    :timer.sleep(100)
+    :timer.sleep(1)
     network_id
       |> NeuronNetwork.process_signals()
-    :timer.sleep(100)
+    :timer.sleep(1)
     result = network_id 
                |> NeuronNetwork.extract_output()
-    :timer.sleep(100)
+    :timer.sleep(1)
     network_id
       |> NeuronNetwork.stop_network()
     result

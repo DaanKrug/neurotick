@@ -1,5 +1,7 @@
 defmodule Neurotick.Stochastic.StochasticMath do
 
+  alias Krug.MathUtil
+
   @biggest_diff 1000000
   
   def compare_results(expected_result,current_result,new_result) do
@@ -7,6 +9,8 @@ defmodule Neurotick.Stochastic.StochasticMath do
                |> absolute_diff_array([current_result])
     diff_2 = [expected_result]
                |> absolute_diff_array([new_result])
+    [diff_1,diff_2]
+      |> IO.inspect()
     cond do
       (diff_1 < diff_2)
         -> 0
@@ -58,9 +62,13 @@ defmodule Neurotick.Stochastic.StochasticMath do
              |> absolute_diff_array2(
                   array_b 
                     |> tl(),
-                  absolute_diff + ((array_a |> hd()) - (array_b |> hd()))
+                  absolute_diff + calculate_diff(array_a |> hd(),array_b |> hd())
                 )
     end
+  end
+  
+  defp calculate_diff(number_a,number_b) do
+    (number_a - number_b)
   end
   
   defp module_diff(absolute_diff) do

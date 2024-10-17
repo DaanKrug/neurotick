@@ -93,7 +93,7 @@ defmodule Neurotick.SimpleNeuronTest do
     network_id
       |> NeuronNetwork.stop_network()
       
-    :timer.sleep(5000)
+    :timer.sleep(500)
     
     "testing stochastic neuron network mutation ... "
       |> IO.inspect()
@@ -166,8 +166,15 @@ defmodule Neurotick.SimpleNeuronTest do
     
     stochastic_id = "echo_test"
     
+    max_attemps = 1000
+    
     stochastic_id
-      |> StochasticNeuronNetwork.config(fixed_sensors_array,neurons_array_layers,actuators_array)
+      |> StochasticNeuronNetwork.config(
+           fixed_sensors_array,
+           neurons_array_layers,
+           actuators_array,
+           max_attemps
+         )
       
     mutated_neurons = stochastic_id
                         |> StochasticNeuronNetwork.run_stochastic_neurons_mutation(

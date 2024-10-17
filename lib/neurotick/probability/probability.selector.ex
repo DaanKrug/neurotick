@@ -46,7 +46,7 @@ defmodule Neurotick.Probability.Selector do
   end
   
   defp select4(elements,selected_elements,already_sorted,max) do
-    rand = :rand.uniform(max) - 1
+    rand = (elements |> length() |> :rand.uniform()) - 1
     cond do
       (Enum.member?(already_sorted,rand))
         -> elements
@@ -62,6 +62,4 @@ defmodule Neurotick.Probability.Selector do
   end
 
 end
-
-
 
