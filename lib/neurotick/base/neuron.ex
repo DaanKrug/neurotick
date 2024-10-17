@@ -15,7 +15,8 @@ defmodule Neurotick.Base.Neuron do
       @tablename_activation_functions :neurotick_ets_activation_functions
       
       
-      def new(name,layer,activation_functions,weight,bias,operation,debugg) do
+      def new(params_array) do
+        [name,layer,activation_functions,weight,bias,operation,debugg] = params_array
 	    pid = Process.spawn(__MODULE__,:axion_receptor,[],[])  
 	    EtsUtil.store_in_cache(@tablename_config,pid,[weight,bias,operation,debugg])
 	    EtsUtil.store_in_cache(@tablename_activation_functions,pid,activation_functions)

@@ -16,7 +16,8 @@ defmodule Neurotick.Base.NeuronSensor do
       
       @tablename_config :neurotick_ets_config
       
-      def new(name,debugg) do
+      def new(params_array) do
+        [name,debugg] = params_array
 	    pid = Process.spawn(__MODULE__,:sense,[],[])
 	    EtsUtil.store_in_cache(@tablename_config,pid,[0,0,nil,debugg])
 	    NeuronMetadata.store_metadata(pid,name,__MODULE__)

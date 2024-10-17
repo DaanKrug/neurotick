@@ -7,6 +7,7 @@ defmodule Neurotick.Base.NeuronNetwork do
   alias Neurotick.Base.NeuronUtil
   alias Neurotick.Base.NeuronCortex
   alias Neurotick.Base.NeuronMetadata
+  alias Neurotick.Base.NeuronStarter
   
   @sensors_id "sensors"
   @actuators_id "actuators"
@@ -31,17 +32,23 @@ defmodule Neurotick.Base.NeuronNetwork do
       |> NeuronLayer.terminate_all_layers()
   end
   
-  def config_sensors(network_id,sensors_array) do
-    NeuronStorage.store_network_element(network_id,@sensors_id,sensors_array)
+  def config_sensors(network_id,sensors_array_params) do
+    sensors_pids = sensors_array_params 
+                     |> NeuronStarter.start_pids()
+    NeuronStorage.store_network_element(network_id,@sensors_id,sensors_pids)
   end
   
-  def config_actuators(network_id,actuators_array) do
-    NeuronStorage.store_network_element(network_id,@actuators_id,actuators_array)
+  def config_actuators(network_id,actuators_array_params) do
+    actuators_pids = actuators_array_params 
+                       |> NeuronStarter.start_pids()
+    NeuronStorage.store_network_element(network_id,@actuators_id,actuators_pids)
   end
   
   def config_neurons(network_id,neurons_array_layers) do
+    neuron_layer_pids = neurons_array_layers 
+                          |> NeuronStarter.start_pid_layers()
     network_id
-      |> NeuronLayer.add_neuron_layers(neurons_array_layers)
+      |> NeuronLayer.add_neuron_layers(neuron_layer_pids)
   end
   
   def process_signals(network_id) do

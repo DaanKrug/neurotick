@@ -1,9 +1,9 @@
 defmodule Neurotick.Stochastic.NeuronStorage do
 
   alias Krug.EtsUtil
-  alias Neurotick.Base.NeuronNetwork
   alias Neurotick.Stochastic.Selector
-
+  
+  
   @tablename_sensors_layer "table_sensors_layer_"
   @tablename_neuron_layers "table_neuron_layer_"
   @tablename_actuators_layer "table_actuators_layer"
@@ -11,15 +11,15 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   
   # config
   def config(id,sensors_array,neurons_array,actuators_array) do
-  	EtsUtil.new(@tablename_sensors_layer <> id)
-  	EtsUtil.new(@tablename_neuron_layers <> id)
-    EtsUtil.new(@tablename_actuators_layer <> id)
+  	EtsUtil.new(:"#{@tablename_sensors_layer <> id}")
+  	EtsUtil.new(:"#{@tablename_neuron_layers <> id}")
+    EtsUtil.new(:"#{@tablename_actuators_layer <> id}")
     id 
-      |> NeuronStorage.init_sensors(sensors_array)
+      |> init_sensors(sensors_array)
     id
-      |> NeuronStorage.init_actuators(actuators_array)
+      |> init_actuators(actuators_array)
     id
-      |> NeuronStorage.init_neurons(neurons_array)
+      |> init_neurons(neurons_array)
   end
   
   # lef attemps
