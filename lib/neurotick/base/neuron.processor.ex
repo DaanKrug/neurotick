@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronProcessor do
 
+  @moduledoc false
+
   use Neurotick.Base.NeuronLogger
 
   alias Neurotick.Base.NeuronOperationParam

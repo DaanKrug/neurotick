@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronMetadata do
 
+  @moduledoc false
+
   alias Krug.EtsUtil
   alias Krug.MapUtil
   alias Krug.FileUtil

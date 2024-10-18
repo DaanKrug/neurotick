@@ -1,5 +1,27 @@
 defmodule Neurotick.Base.Neuron do
 
+  @moduledoc """
+  Implements basic functionality for a Neural Network Neuron element.
+  To be used in a "Neurotick.Base.NeuronNetwork".
+  
+  Constructor: new(params_array) => [name,layer,activation_functions,weight,bias,operation,debugg] = params_array
+  
+  name: Name/Id of the neuron on neural network (ex: "N1", "N2").
+  layer: Number of layer wich this neuron participate.
+  activation_functions: Activation functions that will be applied to neuron output, 
+  before send the output result forward to next node (neuron/actuator).
+  weight: Weight applied to output calculation.
+  bias: Bias deviation applied to output calculation.
+  operation: Math operation applied to input signals (could be "*", "+", "-" and "/"), default to "*".
+  debugg: For write down some processing results.
+  
+  You should implements read_sensor_data() to collect the sensor data
+  (could be a real world dispositive signal input or a simulation/program generated input).
+  
+  You should implement read_sensor_weight() to collect the sensor weight of sensor data value
+   throught the Neural Network signal data processing interations.
+  """
+  
   defmacro __using__(_opts) do
   
     quote do

@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronLayer do
 
+  @moduledoc false
+
   alias Neurotick.Base.NeuronUtil
   alias Neurotick.Base.NeuronStorage
   alias Neurotick.Base.NeuronMetadata

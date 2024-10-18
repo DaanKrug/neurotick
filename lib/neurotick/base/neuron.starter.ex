@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronStarter do
 
+  @moduledoc false
+
   def start_pid_layers(layers,started_pids \\ []) do
     cond do
       (Enum.empty?(layers))

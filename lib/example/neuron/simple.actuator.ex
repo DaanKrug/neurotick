@@ -1,5 +1,7 @@
 defmodule Neurotick.Example.SimpleActuator do
 
+  @moduledoc false
+
   use Neurotick.Base.NeuronActuator
   
   @behaviour Neurotick.Base.NeuronActuator

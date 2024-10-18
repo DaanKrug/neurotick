@@ -152,6 +152,8 @@ defmodule Neurotick.SimpleNeuronTest do
     original_result = network_id 
                          |> NeuronNetwork.extract_output()
                          
+    #assert original_result == [[102.0, 102, 102.5], [102.0, 102, 102.5], [102.0, 102, 102.5]]
+                         
     #original_result
     #  |> IO.inspect()
     
@@ -161,19 +163,109 @@ defmodule Neurotick.SimpleNeuronTest do
       |> NeuronNetwork.stop_network()
    
     # original
-    #                 [[102.0, 102.5, 102.0], [102.0, 102.5, 102.0], [102.0, 102.5, 102.0]]                
+    #                 [[102.0, 102, 102.5], [102.0, 102, 102.5], [102.0, 102, 102.5]]                
     expected_result = [[105.0, 103.5, 100.0], [105.0, 103.5, 100.0], [105.0, 103.5, 100.0]]
     
     stochastic_id = "echo_test"
     
     max_attemps = 1000
+    round_precision = 2
     
     stochastic_id
       |> StochasticNeuronNetwork.config(
            fixed_sensors_array,
            neurons_array_layers,
            actuators_array,
-           max_attemps
+           max_attemps,
+           round_precision
+         )
+      
+    mutated_neurons = stochastic_id
+                        |> StochasticNeuronNetwork.run_stochastic_neurons_mutation(
+                             expected_result
+                           )
+    
+    network_id = NeuronNetwork.start_network()
+    NeuronNetwork.config_sensors(network_id,fixed_sensors_array)
+    NeuronNetwork.config_actuators(network_id,actuators_array)
+    NeuronNetwork.config_neurons(network_id,mutated_neurons)
+ 
+    network_id
+      |> NeuronNetwork.process_signals()
+      
+    :timer.sleep(100)
+    
+    final_result = network_id 
+                         |> NeuronNetwork.extract_output()
+                         
+    # NeuronNetwork.debugg(network_id,"./final_network_struct.txt")
+    
+    network_id
+      |> NeuronNetwork.stop_network()
+   
+   
+    #["neurons_array_layers", neurons_array_layers]
+    #  |> IO.inspect()
+    #["mutated_neurons", mutated_neurons]
+    #  |> IO.inspect()
+ 
+    ["original_result",original_result]
+      |> IO.inspect()
+    ["expected_result",expected_result]
+      |> IO.inspect()
+    ["final_result",final_result]
+      |> IO.inspect()
+    
+    "=========  XXX  =========  XXX  =========="
+      |> IO.inspect()
+    :timer.sleep(500)
+           
+    neurons_array_3b = [
+      [SimpleNeuron,"N11",3,[],1,0.5,"*",false]
+    ]
+    
+    neurons_array_layers = [
+      neurons_array_0,
+      neurons_array_1,
+      neurons_array_2,
+      neurons_array_3b
+    ]
+ 
+    network_id = NeuronNetwork.start_network()
+    NeuronNetwork.config_sensors(network_id,fixed_sensors_array)
+    NeuronNetwork.config_actuators(network_id,actuators_array)
+    NeuronNetwork.config_neurons(network_id,neurons_array_layers)
+ 
+    network_id
+      |> NeuronNetwork.process_signals()
+      
+    :timer.sleep(100)
+    
+    original_result = network_id 
+                         |> NeuronNetwork.extract_output()
+                         
+    #assert original_result == [[102.5], [102.5], [102.5]]
+ 
+    "=========  YYY  =========  YYY  =========="
+      |> IO.inspect()
+    :timer.sleep(500)
+    
+    # original
+    #                 [[102.5], [102.5], [102.5]]                
+    expected_result = [[105.0], [105.0], [105.0]]
+    
+    stochastic_id = "echo_test2"
+    
+    max_attemps = 1000
+    round_precision = 3
+    
+    stochastic_id
+      |> StochasticNeuronNetwork.config(
+           fixed_sensors_array,
+           neurons_array_layers,
+           actuators_array,
+           max_attemps,
+           round_precision
          )
       
     mutated_neurons = stochastic_id

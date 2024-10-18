@@ -6,7 +6,7 @@ defmodule Neurotick.MixProject do
   def project do
     [
       app: :neurotick,
-      version: "0.0.2",
+      version: "0.0.4",
       elixir: "~> 1.13",
       source_url: @project_url,
       homepage_url: @project_url,
@@ -32,7 +32,7 @@ defmodule Neurotick.MixProject do
       {:earmark, "~> 1.4.13", only: :dev, runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:dialyxir, "~> 1.1", only: :dev, runtime: false},
-      {:krug, "~> 1.1.45"}
+      {:krug, "~> 2.0.26"}
     ]
   end
   

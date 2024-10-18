@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronOperationParam do
 
+  @moduledoc false
+
   def extract_inputs(signals_array,inputs \\ []) do
     cond do
       (Enum.empty?(signals_array))

@@ -1,5 +1,7 @@
 defmodule Neurotick.Probability.Selector do
 
+  @moduledoc false
+
   alias Krug.NumberUtil
 
   def select(elements,probability) do

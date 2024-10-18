@@ -1,5 +1,7 @@
 defmodule Neurotick.Stochastic.StochasticMutator do
 
+  @moduledoc false
+
   alias Neurotick.Stochastic.NeuronStorage
   alias Neurotick.Stochastic.Selector
   

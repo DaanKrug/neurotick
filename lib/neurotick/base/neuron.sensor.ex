@@ -1,5 +1,21 @@
 defmodule Neurotick.Base.NeuronSensor do
 
+  @moduledoc """
+  Implements basic functionality for a Neural Network Sensor element.
+  To be used in a "Neurotick.Base.NeuronNetwork".
+  
+  Constructor: new(params_array) => [name,debugg] = params_array
+  
+  name: Name/Id of the sensor on neural network (ex: "S1", "S2").
+  debugg: For write down some processing results.
+  
+  You should implements read_sensor_data() to collect the sensor data
+  (could be a real world dispositive signal input or a simulation/program generated input).
+  
+  You should implement read_sensor_weight() to collect the sensor weight of sensor data value
+   throught the Neural Network signal data processing interations.
+  """
+  
   @callback read_sensor_data() :: Float.t()
       
   @callback read_sensor_weight() :: Float.t()

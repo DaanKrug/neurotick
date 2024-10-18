@@ -1,5 +1,7 @@
 defmodule Neurotick.Example.TanhFunction do
 
+  @moduledoc false
+
   @behaviour Neurotick.Base.ActivationFunctionBehaviour
   
   @impl Neurotick.Base.ActivationFunctionBehaviour

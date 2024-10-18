@@ -1,5 +1,7 @@
 defmodule Neurotick.Stochastic.Selector do
 
+  @moduledoc false
+
   alias Krug.NumberUtil
   alias Krug.MathUtil
   alias Neurotick.Probability.Selector

@@ -1,5 +1,7 @@
 defmodule Neurotick.Stochastic.NeuronStorage do
 
+  @moduledoc false
+
   alias Krug.EtsUtil
   alias Neurotick.Stochastic.Selector
   
@@ -7,19 +9,29 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   @tablename_sensors_layer "table_sensors_layer_"
   @tablename_neuron_layers "table_neuron_layer_"
   @tablename_actuators_layer "table_actuators_layer_"
+  @tablename_math_params "table_math_params_"
   
   
   # config
-  def config(id,sensors_array,neurons_array,actuators_array,max_attemps) do
+  def config(id,sensors_array,neurons_array,actuators_array,max_attemps,round_precision) do
   	EtsUtil.new(:"#{@tablename_sensors_layer <> id}")
   	EtsUtil.new(:"#{@tablename_neuron_layers <> id}")
     EtsUtil.new(:"#{@tablename_actuators_layer <> id}")
+    EtsUtil.new(:"#{@tablename_math_params <> id}")
+    :"#{@tablename_math_params <> id}"
+      |> EtsUtil.store_in_cache("round_precision",round_precision)
     id 
       |> init_sensors(sensors_array,max_attemps)
     id
       |> init_actuators(actuators_array,max_attemps)
     id
       |> init_neurons(neurons_array,max_attemps)
+  end
+  
+  # math params
+  def get_round_precision(id) do
+    :"#{@tablename_math_params <> id}"
+      |> EtsUtil.read_from_cache("round_precision")
   end
   
   # lef attemps

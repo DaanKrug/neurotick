@@ -1,5 +1,19 @@
 defmodule Neurotick.Base.NeuronActuator do
 
+  @moduledoc """
+  Implements basic functionality for a Neural Network Actuator element.
+  To be used in a "Neurotick.Base.NeuronNetwork".
+  
+  Constructor: new(params_array) => [name,debugg] = params_array
+  
+  name: Name/Id of the actuator on neural network (ex: "A1", "A2").
+  debugg: For write down some processing results.
+  
+  You should implements activated(signals_array) method to process the final result,
+  as example use the result to trigger some action based on value ( real world equipment )
+  or to use in a simulated environment( program to display some result ). 
+  """
+
   @callback activated(signals_array :: Float.t()) :: Float.t()
     
   defmacro __using__(_opts) do

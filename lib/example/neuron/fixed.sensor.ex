@@ -1,5 +1,7 @@
 defmodule Neurotick.Example.FixedSensor do
 
+  @moduledoc false
+
   use Neurotick.Base.NeuronSensor
   
   @behaviour Neurotick.Base.NeuronSensor

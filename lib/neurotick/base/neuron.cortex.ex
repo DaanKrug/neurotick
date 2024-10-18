@@ -1,5 +1,7 @@
 defmodule Neurotick.Base.NeuronCortex do
 
+  @moduledoc false
+
   alias Neurotick.Base.NeuronStorage
   
   @sensors_id "sensors"
