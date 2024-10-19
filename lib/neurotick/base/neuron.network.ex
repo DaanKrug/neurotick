@@ -57,8 +57,7 @@ defmodule Neurotick.Base.NeuronNetwork do
   results = network_id 
               |> NeuronNetwork.extract_output()
  
-  ```
-  
+  ```  
   """
 
   alias Krug.SanitizerUtil

@@ -5,8 +5,22 @@ defmodule Neurotick.Stochastic.StochasticMutator do
   alias Neurotick.Stochastic.NeuronStorage
   alias Neurotick.Stochastic.Selector
   
+  @mutating_element_neuron_weight "mutating_element_neuron_weight"
   
-  def mutate_neurons(stochastic_id) do
+  
+  def mutate_elements(stochastic_id) do
+    mutating_element_type = stochastic_id 
+                              |> NeuronStorage.read_mutating_element_type()
+    cond do
+      (mutating_element_type == @mutating_element_neuron_weight)
+        -> stochastic_id
+             |> mutate_neurons()
+      true
+        -> :ok
+    end
+  end
+    
+  defp mutate_neurons(stochastic_id) do
     neurons_array_layer = stochastic_id
                       |> NeuronStorage.get_neurons()
     neuron_names_to_disturb = neurons_array_layer
@@ -60,7 +74,6 @@ defmodule Neurotick.Stochastic.StochasticMutator do
 
   defp disturb_neuron_weight(neuron,neuron_names_to_disturb) do
     [module,name,layer,activation_functions,weight,bias,operation,debugg] = neuron
-    weight_perturbation = Selector.choose_weight_perturbation()
     cond do
       (!(Enum.member?(neuron_names_to_disturb,name)))
         -> neuron
@@ -70,7 +83,7 @@ defmodule Neurotick.Stochastic.StochasticMutator do
              name,
              layer,
              activation_functions,
-             weight + weight_perturbation,
+             weight + Selector.choose_weight_perturbation(),
              bias,
              operation,
              debugg

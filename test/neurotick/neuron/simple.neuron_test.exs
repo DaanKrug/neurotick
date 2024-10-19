@@ -181,7 +181,7 @@ defmodule Neurotick.SimpleNeuronTest do
          )
       
     mutated_neurons = stochastic_id
-                        |> StochasticNeuronNetwork.run_stochastic_neurons_mutation(
+                        |> StochasticNeuronNetwork.run_stochastic_mutations(
                              expected_result
                            )
     
@@ -269,7 +269,7 @@ defmodule Neurotick.SimpleNeuronTest do
          )
       
     mutated_neurons = stochastic_id
-                        |> StochasticNeuronNetwork.run_stochastic_neurons_mutation(
+                        |> StochasticNeuronNetwork.run_stochastic_mutations(
                              expected_result
                            )
     

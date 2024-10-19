@@ -10,6 +10,7 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   @tablename_neuron_layers "table_neuron_layer_"
   @tablename_actuators_layer "table_actuators_layer_"
   @tablename_math_params "table_math_params_"
+  @table_element_type_mutating "table_element_type_mutating_"
   
   
   # config
@@ -18,6 +19,7 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   	EtsUtil.new(:"#{@tablename_neuron_layers <> id}")
     EtsUtil.new(:"#{@tablename_actuators_layer <> id}")
     EtsUtil.new(:"#{@tablename_math_params <> id}")
+    EtsUtil.new(:"#{@table_element_type_mutating <> id}")
     :"#{@tablename_math_params <> id}"
       |> EtsUtil.store_in_cache("round_precision",round_precision)
     id 
@@ -26,6 +28,16 @@ defmodule Neurotick.Stochastic.NeuronStorage do
       |> init_actuators(actuators_array,max_attemps)
     id
       |> init_neurons(neurons_array,max_attemps)
+  end
+  
+  def set_mutating_element_type(id,element_type) do
+    :"#{@table_element_type_mutating <> id}"
+      |> EtsUtil.store_in_cache("element_type",element_type)
+  end
+  
+  def read_mutating_element_type(id) do
+    :"#{@table_element_type_mutating <> id}"
+      |> EtsUtil.read_from_cache("element_type")
   end
   
   # math params
@@ -40,7 +52,7 @@ defmodule Neurotick.Stochastic.NeuronStorage do
     max = tablename
             |> EtsUtil.read_from_cache("sensors_array_max_attemps")
     current = tablename
-                |> EtsUtil.read_from_cache("sensors_array_current_attemps")
+                |> EtsUtil.read_from_cache("sensors_array_current_attemps")          
     current < max
   end
   
@@ -60,6 +72,14 @@ defmodule Neurotick.Stochastic.NeuronStorage do
     current = tablename
                 |> EtsUtil.read_from_cache("neurons_array_current_attemps")
     current < max
+  end
+  
+  def reset_neurons_attemps(id) do
+    tablename = :"#{@tablename_neuron_layers <> id}"
+    tablename
+      |> EtsUtil.remove_from_cache("neurons_array_current_attemps")
+    tablename
+      |> EtsUtil.store_in_cache("neurons_array_current_attemps",0)
   end
   
   # get current values

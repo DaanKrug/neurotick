@@ -9,6 +9,7 @@ defmodule Neurotick.Stochastic.Selector do
   @meta_pi 314159
   @meta_pi_range (314159 * 2) + 1
   @meta_pi_divider 100000000
+  @operations ["+","-","/","*"]
   
   def select_elements(elements) do
     probability = 1 / (elements |> length() |> :math.sqrt())
@@ -21,6 +22,19 @@ defmodule Neurotick.Stochastic.Selector do
     pow2 = MathUtil.pow(:rand.uniform(8),2)
     rand_pi_divider_multiplier = MathUtil.pow(pow2,2)
     rand / (@meta_pi_divider * rand_pi_divider_multiplier)
+  end
+  
+  def choose_operation_perturbation(current_operation) do
+    rand = :rand.uniform(4) - 1
+    operation = @operations
+                  |> Enum.at(rand)
+    cond do
+      (current_operation == operation)
+        -> current_operation
+             |> choose_operation_perturbation()
+      true
+        -> operation
+    end
   end
   
   def max_attemps(elements) do
