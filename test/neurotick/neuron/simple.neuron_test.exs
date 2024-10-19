@@ -256,7 +256,7 @@ defmodule Neurotick.SimpleNeuronTest do
     
     stochastic_id = "echo_test2"
     
-    max_attemps = 1000
+    max_attemps = 100
     round_precision = 3
     
     stochastic_id

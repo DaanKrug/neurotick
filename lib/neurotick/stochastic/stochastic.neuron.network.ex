@@ -73,8 +73,10 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   
   
   @mutating_element_neuron_weight "mutating_element_neuron_weight"
+  @mutating_topology_neuron "mutating_topology_neuron"
   @mutating_element_neurons [
-  	@mutating_element_neuron_weight
+  	@mutating_element_neuron_weight,
+  	@mutating_topology_neuron
   ]
   
 
@@ -117,13 +119,13 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   
   
   
-  defp change_mutating_element_and_continue(stochastic_id,_expected_result,mutating_element_type) do
+  defp change_mutating_element_and_continue(stochastic_id,expected_result,mutating_element_type) do
     ["mutating_element_type => ",mutating_element_type]
       |> IO.inspect()
     cond do
       (mutating_element_type == @mutating_element_neuron_weight)
         -> stochastic_id
-             |> NeuronStorage.get_neurons()
+             |> change_mutating_element_and_continue2(expected_result,@mutating_topology_neuron)   
       true
         -> stochastic_id
              |> NeuronStorage.get_neurons()
