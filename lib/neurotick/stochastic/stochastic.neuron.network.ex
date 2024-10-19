@@ -28,7 +28,8 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   expected_result = [[105.0], [105.0], [105.0]]                    
  
   stochastic_id = "my_stochastic_network_id"
-  max_attemps = 1000
+  max_attemps_neuron = 1000
+  max_attemps_topology = 10
   round_precision = 3
     
   stochastic_id
@@ -36,8 +37,9 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
          fixed_sensors_array,
          neurons_array_layers,
          actuators_array,
-         max_attemps,
-         round_precision
+         round_precision,
+         max_attemps_neuron,
+         max_attemps_topology
        )
      
   # find better Neuron Layers mutated weights 
@@ -69,17 +71,10 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   alias Neurotick.Base.NeuronNetwork
   alias Neurotick.Stochastic.NeuronStorage
   alias Neurotick.Stochastic.StochasticMath
-  alias Neurotick.Stochastic.StochasticMutator
+  alias Neurotick.Mutator.NeuronMutator
+  alias Neurotick.Mutator.NeuronTopologyMutator
   
   
-  @mutating_element_neuron_weight "mutating_element_neuron_weight"
-  @mutating_topology_neuron "mutating_topology_neuron"
-  @mutating_element_neurons [
-  	@mutating_element_neuron_weight,
-  	@mutating_topology_neuron
-  ]
-  
-
     
   @doc """
   Initializes the SHC-RR parameters.
@@ -88,14 +83,15 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   sensors_array: Sensors of Neural Network.
   neurons_array: Neurons Layers of Neural Network.
   actuators_array: Actuators of Neural Network.
-  max_attemps \\ nil: Max Attemps to find better weights disturbation. When nil will be calculated based on Neurons size.
+  max_attemps_neuron \\ nil: Max Attemps to find better weights disturbation. When nil will be calculated based on Neurons size.
+  max_attemps_topology \\ nil: Max Attemps to find better weights disturbation. When nil will be default to 1.
   round_precision \\ 2: Round decimal digits to be used on difference calculation between expected results and calculated results.
   """
-  def config(stochastic_id,sensors_array,neurons_array,actuators_array,max_attemps \\ nil,round_precision \\ 2) do
+  def config(stochastic_id,sensors_array,neurons_array,actuators_array,
+             round_precision \\ 2,max_attemps_neuron \\ nil,max_attemps_topology \\ 1) do
     stochastic_id
-      |> NeuronStorage.config(sensors_array,neurons_array,actuators_array,max_attemps,round_precision)
-    stochastic_id
-      |> NeuronStorage.set_mutating_element_type(@mutating_element_neuron_weight)
+      |> NeuronStorage.config(sensors_array,neurons_array,actuators_array,
+                              round_precision,max_attemps_neuron,max_attemps_topology)
   end
   
   
@@ -104,13 +100,14 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   Runt the SHC-RR for configured Neural Network parameters with the received "expected_result".
   """
   def run_stochastic_mutations(stochastic_id,expected_result) do
-    mutating_element = stochastic_id
-                         |> NeuronStorage.read_mutating_element_type()
     cond do
-      (Enum.member?(@mutating_element_neurons,mutating_element)
+      (!(stochastic_id |> NeuronStorage.left_topology_attemps())
         and !(stochastic_id |> NeuronStorage.left_neurons_attemps()))
           -> stochastic_id
-               |> change_mutating_element_and_continue(expected_result,mutating_element)
+               |> NeuronStorage.get_neurons()
+      (!(stochastic_id |> NeuronStorage.left_neurons_attemps()))
+        -> stochastic_id
+             |> mutate_topology_and_continue(expected_result)
       true
         -> stochastic_id
              |> run_stochastic_mutations2(expected_result)
@@ -119,24 +116,11 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   
   
   
-  defp change_mutating_element_and_continue(stochastic_id,expected_result,mutating_element_type) do
-    ["mutating_element_type => ",mutating_element_type]
-      |> IO.inspect()
-    cond do
-      (mutating_element_type == @mutating_element_neuron_weight)
-        -> stochastic_id
-             |> change_mutating_element_and_continue2(expected_result,@mutating_topology_neuron)   
-      true
-        -> stochastic_id
-             |> NeuronStorage.get_neurons()
-    end
-  end
-  
-  
-  
-  defp change_mutating_element_and_continue2(stochastic_id,expected_result,mutating_element_type) do
+  defp mutate_topology_and_continue(stochastic_id,expected_result) do
     stochastic_id
-      |> NeuronStorage.set_mutating_element_type(mutating_element_type)
+      |> NeuronTopologyMutator.mutate_neurons_topology()
+    stochastic_id
+      |> NeuronStorage.increment_topology_attemps()
     stochastic_id
       |> NeuronStorage.reset_neurons_attemps()
     stochastic_id
@@ -151,7 +135,7 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
     current_result = stochastic_id
                        |> run_network()
     stochastic_id
-      |> StochasticMutator.mutate_elements()
+      |> NeuronMutator.mutate_neurons()
     new_result = stochastic_id
                    |> run_network()  
     [

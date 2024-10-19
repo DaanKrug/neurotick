@@ -4,40 +4,55 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
 
   alias Neurotick.Stochastic.NeuronStorage
   alias Neurotick.Stochastic.Selector
+  alias Krug.StringUtil
+  alias Krug.DateUtil
   
   
-  def mutate_neurons_topology(stochastic_id) do
+  def mutate_neurons_topology(stochastic_id,only_for_add \\ false) do
     neurons_array_layer = stochastic_id
                             |> NeuronStorage.get_neurons()
     neuron_names_to_disturb = neurons_array_layer
-                                |> flattify_neurons_names()
+                                |> flattify_neurons_names(only_for_add)
+    cond do
+      (Enum.empty?(neuron_names_to_disturb))
+        -> stochastic_id
+             |> mutate_neurons_topology(true)
+      true
+        -> stochastic_id 
+             |> mutate_neurons_topology2(neuron_names_to_disturb,neurons_array_layer,only_for_add)
+    end     
+  end
+  
+  def mutate_neurons_topology2(stochastic_id,neuron_names_to_disturb,neurons_array_layer,only_for_add) do    
+    neuron_names_to_disturb = neuron_names_to_disturb                           
                                 |> Selector.select_elements()
     mutated_neurons_array_layer = neuron_names_to_disturb 
-                                    |> duplicate_remove_neurons(neurons_array_layer)  
+                                    |> duplicate_remove_neurons(neurons_array_layer,only_for_add)  
     stochastic_id
       |> NeuronStorage.set_neurons(mutated_neurons_array_layer)
   end
 
-  defp duplicate_remove_neurons(neuron_names_to_disturb,neurons_array_layer) do
+  defp duplicate_remove_neurons(neuron_names_to_disturb,neurons_array_layer,only_for_add) do
     cond do
       (Enum.empty?(neuron_names_to_disturb))
         -> neurons_array_layer
       true
         -> neuron_names_to_disturb
-             |> duplicate_remove_neurons2(neurons_array_layer)
+             |> duplicate_remove_neurons2(neurons_array_layer,only_for_add)
     end
   end
   
-  defp duplicate_remove_neurons2(neuron_names_to_disturb,neurons_array_layer) do
+  defp duplicate_remove_neurons2(neuron_names_to_disturb,neurons_array_layer,only_for_add) do
     neuron_name = neuron_names_to_disturb
                     |> hd()
-    neurons_array_layer = mutate_neurons_array_layers(neuron_name,neurons_array_layer)                             
+    neurons_array_layer = neuron_name
+                            |> mutate_neurons_array_layers(neurons_array_layer,only_for_add)                             
     neuron_names_to_disturb
       |> tl()
-      |> duplicate_remove_neurons(neurons_array_layer)
+      |> duplicate_remove_neurons(neurons_array_layer,only_for_add)
   end
   
-  defp mutate_neurons_array_layers(neuron_name,neurons_array_layer,mutated_layers \\ []) do
+  defp mutate_neurons_array_layers(neuron_name,neurons_array_layer,only_for_add,mutated_layers \\ []) do
     cond do
       (Enum.empty?(neurons_array_layer))
         -> mutated_layers
@@ -47,11 +62,13 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
              |> mutate_neurons_array_layers(
                   neurons_array_layer
                     |> tl(),
+                  only_for_add,
                   [
                     neuron_name
                       |> mutate_neurons_array(
                            neurons_array_layer 
-                             |> hd()
+                             |> hd(),
+                           only_for_add
                          )
                       | mutated_layers
                   ]
@@ -59,17 +76,17 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
     end
   end
   
-  defp mutate_neurons_array(neuron_name,neurons_array,mutated_neurons_array \\ []) do
+  defp mutate_neurons_array(neuron_name,neurons_array,only_for_add,mutated_neurons_array \\ []) do
     cond do
       (Enum.empty?(neurons_array))
         -> mutated_neurons_array
       true
         -> neuron_name
-             |> mutate_neurons_array2(neurons_array,mutated_neurons_array)
+             |> mutate_neurons_array2(neurons_array,only_for_add,mutated_neurons_array)
     end
   end
   
-  defp mutate_neurons_array2(neuron_name,neurons_array,mutated_neurons_array) do
+  defp mutate_neurons_array2(neuron_name,neurons_array,only_for_add,mutated_neurons_array) do
     neuron = neurons_array
               |> hd()
     [_,name,_,_,_,_,_,_] = neuron
@@ -79,6 +96,7 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
              |> mutate_neurons_array(
                   neurons_array
                     |> tl(),
+                  only_for_add,
                   [
                     neuron 
                       | mutated_neurons_array
@@ -86,33 +104,34 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                 )
       true
         -> neuron_name
-             |> mutate_neurons_array3(neurons_array,mutated_neurons_array)
+             |> mutate_neurons_array3(neurons_array,only_for_add,mutated_neurons_array)
     end
   end
   
-  defp mutate_neurons_array3(neuron_name,neurons_array,mutated_neurons_array) do
+  defp mutate_neurons_array3(neuron_name,neurons_array,only_for_add,mutated_neurons_array) do
     neuron_name
       |> mutate_neurons_array(
            neurons_array
              |> tl(),
+           only_for_add,
            neurons_array
              |> hd()
-             |> duplicate_or_disapear_neuron(mutated_neurons_array)
+             |> duplicate_or_disapear_neuron(only_for_add,mutated_neurons_array)
          )
   end
   
-  defp duplicate_or_disapear_neuron(neuron,mutated_neurons_array) do
+  defp duplicate_or_disapear_neuron(neuron,only_for_add,mutated_neurons_array) do
     rand = :rand.uniform(2)
-    [
-      "duplicate_or_disapear_neuron",
-      rand
-    ]
-      |> IO.inspect()
     cond do
-      (rand == 1)
-        -> mutated_neurons_array
+      (rand == 1
+        and !only_for_add)
+          -> mutated_neurons_array
       true
-        -> [neuron,neuron] 
+        -> [
+             neuron,
+             neuron 
+               |> clone_neuron()
+           ] 
              |> append_neurons(mutated_neurons_array)
     end
   end
@@ -128,19 +147,21 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
     end
   end
   
-  defp flattify_neurons_names(neurons_array_layers,flat_neurons_array_names \\ []) do
+  defp flattify_neurons_names(neurons_array_layers,only_for_add,flat_neurons_array_names \\ []) do
     cond do
       (neurons_array_layers |> length() < 2)
         -> flat_neurons_array_names
              |> Enum.reverse()
-      (neurons_array_layers |> hd() |> length() < 2)
-        -> neurons_array_layers
-             |> tl()
-             |> flattify_neurons_names(flat_neurons_array_names)
+      (!only_for_add 
+        and neurons_array_layers |> hd() |> length() < 2)
+          -> neurons_array_layers
+               |> tl()
+               |> flattify_neurons_names(only_for_add,flat_neurons_array_names)
       true
         -> neurons_array_layers
              |> tl()
              |> flattify_neurons_names(
+                  only_for_add,
                   neurons_array_layers
                     |> hd()
                     |> flattify_neurons_names2(flat_neurons_array_names)
@@ -167,5 +188,13 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                 )
     end
   end
-  
+
+  defp clone_neuron(neuron) do
+    [module,name,layer,activation_functions,weight,_bias,operation,debugg] = neuron
+    new_name = name 
+                 |> StringUtil.split("_")
+                 |> hd()
+    new_name = "#{new_name}_#{DateUtil.get_date_time_now_millis()}"
+    [module,new_name,layer,activation_functions,weight,0,operation,debugg]
+  end  
 end

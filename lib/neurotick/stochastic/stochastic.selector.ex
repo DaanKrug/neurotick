@@ -12,8 +12,18 @@ defmodule Neurotick.Stochastic.Selector do
   @operations ["+","-","/","*"]
   
   def select_elements(elements) do
-    probability = 1 / (elements |> length() |> :math.sqrt())
-    Selector.select(elements,probability)
+    size = elements 
+             |> length() 
+    cond do
+      (size < 4)
+        -> elements
+             |> Selector.select(1/5)
+      true
+        -> elements
+             |> Selector.select(
+                  1/(size |> :math.sqrt())
+                )
+    end
   end
   
   # -PI to + PI

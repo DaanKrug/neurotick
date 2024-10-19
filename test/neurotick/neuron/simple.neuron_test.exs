@@ -168,7 +168,8 @@ defmodule Neurotick.SimpleNeuronTest do
     
     stochastic_id = "echo_test"
     
-    max_attemps = 1000
+    max_attemps_neuron = 10
+    max_attemps_topology = 1
     round_precision = 2
     
     stochastic_id
@@ -176,8 +177,9 @@ defmodule Neurotick.SimpleNeuronTest do
            fixed_sensors_array,
            neurons_array_layers,
            actuators_array,
-           max_attemps,
-           round_precision
+           round_precision,
+           max_attemps_neuron,
+           max_attemps_topology
          )
       
     mutated_neurons = stochastic_id
@@ -256,7 +258,8 @@ defmodule Neurotick.SimpleNeuronTest do
     
     stochastic_id = "echo_test2"
     
-    max_attemps = 100
+    max_attemps_neurons = 100
+    max_attemps_topology = 10
     round_precision = 3
     
     stochastic_id
@@ -264,8 +267,9 @@ defmodule Neurotick.SimpleNeuronTest do
            fixed_sensors_array,
            neurons_array_layers,
            actuators_array,
-           max_attemps,
-           round_precision
+           round_precision,
+           max_attemps_neurons,
+           max_attemps_topology
          )
       
     mutated_neurons = stochastic_id
@@ -303,7 +307,7 @@ defmodule Neurotick.SimpleNeuronTest do
       |> IO.inspect()
     ["final_result",final_result]
       |> IO.inspect()
-    
+      
   end
   
 end
