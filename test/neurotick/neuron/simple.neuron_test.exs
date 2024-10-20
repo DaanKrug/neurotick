@@ -94,8 +94,8 @@ defmodule Neurotick.SimpleNeuronTest do
       |> NeuronNetwork.stop_network()
       
     :timer.sleep(500)
-    
-    "testing stochastic neuron network mutation ... "
+  
+    "testing Stochastic NeuronNetwork multiple actuators output ... "
       |> IO.inspect()
       
     activation_functions = []
@@ -139,11 +139,18 @@ defmodule Neurotick.SimpleNeuronTest do
       neurons_array_3
     ]
     
+    actuators_array = [
+      [SimpleActuator,"A1",false],
+      [SimpleActuator,"A2",false], 
+      [SimpleActuator,"A3",false]  
+    ]
+    
     network_id = NeuronNetwork.start_network()
     NeuronNetwork.config_sensors(network_id,fixed_sensors_array)
     NeuronNetwork.config_actuators(network_id,actuators_array)
     NeuronNetwork.config_neurons(network_id,neurons_array_layers)
  
+    :timer.sleep(10)
     network_id
       |> NeuronNetwork.process_signals()
       
@@ -171,6 +178,7 @@ defmodule Neurotick.SimpleNeuronTest do
     max_attemps_neuron = 10
     max_attemps_topology = 1
     round_precision = 2
+    max_neurons_on_layer = 5
     
     stochastic_id
       |> StochasticNeuronNetwork.config(
@@ -179,7 +187,8 @@ defmodule Neurotick.SimpleNeuronTest do
            actuators_array,
            round_precision,
            max_attemps_neuron,
-           max_attemps_topology
+           max_attemps_topology,
+           max_neurons_on_layer
          )
       
     mutated_neurons = stochastic_id
@@ -217,11 +226,38 @@ defmodule Neurotick.SimpleNeuronTest do
       |> IO.inspect()
     ["final_result",final_result]
       |> IO.inspect()
-    
-    "=========  XXX  =========  XXX  =========="
+  
+    "testing Stochastic NeuronNetwork multiple actuators output ... "
       |> IO.inspect()
-    :timer.sleep(500)
-           
+  
+    activation_functions = []
+    
+    fixed_sensors_array = [
+      [FixedSensor,"S1",false], 
+      [FixedSensor,"S2",false], 
+      [FixedSensor,"S3",false], 
+      [FixedSensor,"S4",false]  
+    ]
+    
+    neurons_array_0 = [
+      [SimpleNeuron,"N1",0,activation_functions,1,2.5,"*",false], 
+      [SimpleNeuron,"N2",0,activation_functions,1,0,"*",false], 
+      [SimpleNeuron,"N3",0,[],0.5,2.5,"*",false],
+      [SimpleNeuron,"N4",0,[],2,0,"*",false]  
+    ]
+    
+    neurons_array_1 = [
+      [SimpleNeuron,"N5",1,activation_functions,1,0,"*",false],
+      [SimpleNeuron,"N6",1,activation_functions,1,0,"*",false],
+      [SimpleNeuron,"N7",1,activation_functions,1,0,"*",false],
+      [SimpleNeuron,"N8",1,activation_functions,1,0,"*",false]
+    ]
+    
+    neurons_array_2 = [
+      [SimpleNeuron,"N9",2,[],1,0,"*",false],
+      [SimpleNeuron,"N10",2,[],1,0,"*",false]
+    ]
+          
     neurons_array_3b = [
       [SimpleNeuron,"N11",3,[],1,0.5,"*",false]
     ]
@@ -232,7 +268,13 @@ defmodule Neurotick.SimpleNeuronTest do
       neurons_array_2,
       neurons_array_3b
     ]
- 
+    
+    actuators_array = [
+      [SimpleActuator,"A1",false],
+      [SimpleActuator,"A2",false], 
+      [SimpleActuator,"A3",false]  
+    ]
+    
     network_id = NeuronNetwork.start_network()
     NeuronNetwork.config_sensors(network_id,fixed_sensors_array)
     NeuronNetwork.config_actuators(network_id,actuators_array)
@@ -261,6 +303,7 @@ defmodule Neurotick.SimpleNeuronTest do
     max_attemps_neurons = 100
     max_attemps_topology = 10
     round_precision = 3
+    max_neurons_on_layer = 5
     
     stochastic_id
       |> StochasticNeuronNetwork.config(
@@ -269,7 +312,8 @@ defmodule Neurotick.SimpleNeuronTest do
            actuators_array,
            round_precision,
            max_attemps_neurons,
-           max_attemps_topology
+           max_attemps_topology,
+           max_neurons_on_layer
          )
       
     mutated_neurons = stochastic_id

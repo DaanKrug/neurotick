@@ -14,13 +14,15 @@ defmodule Neurotick.Stochastic.NeuronStorage do
   
   # config
   def config(id,sensors_array,neurons_array,actuators_array,
-             round_precision,max_attemps_neuron,max_attemps_topology) do
+             round_precision,max_attemps_neuron,max_attemps_topology,max_neurons_on_layer) do
   	EtsUtil.new(:"#{@tablename_sensors_layer <> id}")
   	EtsUtil.new(:"#{@tablename_neuron_layers <> id}")
     EtsUtil.new(:"#{@tablename_actuators_layer <> id}")
     EtsUtil.new(:"#{@tablename_math_params <> id}")
     :"#{@tablename_math_params <> id}"
       |> EtsUtil.store_in_cache("round_precision",round_precision)
+    :"#{@tablename_neuron_layers <> id}"
+      |> EtsUtil.store_in_cache("max_neurons_on_layer",max_neurons_on_layer)
     id 
       |> init_sensors(sensors_array)
     id
@@ -29,6 +31,11 @@ defmodule Neurotick.Stochastic.NeuronStorage do
       |> init_neurons(neurons_array)
     id
       |> init_max_attemps(neurons_array,max_attemps_neuron,max_attemps_topology)
+  end
+  
+  def get_max_neurons_on_layer(id) do
+    :"#{@tablename_neuron_layers <> id}"
+      |> EtsUtil.read_from_cache("max_neurons_on_layer")
   end
   
   # math params

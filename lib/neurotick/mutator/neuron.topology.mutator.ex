@@ -13,85 +13,95 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                              |> NeuronStorage.get_neurons()
     neuron_names_to_disturb = neurons_array_layers
                                 |> flattify_neurons_names(only_for_add)
+    max_neurons_on_layer = stochastic_id
+                             |> NeuronStorage.get_max_neurons_on_layer()
     cond do
       (Enum.empty?(neuron_names_to_disturb))
         -> stochastic_id
              |> mutate_neurons_topology(true)
       true
         -> stochastic_id 
-             |> mutate_neurons_topology2(neuron_names_to_disturb,neurons_array_layers,only_for_add)
+             |> mutate_neurons_topology2(neuron_names_to_disturb,neurons_array_layers,only_for_add,max_neurons_on_layer)
     end     
   end
   
-  def mutate_neurons_topology2(stochastic_id,neuron_names_to_disturb,neurons_array_layers,only_for_add) do    
+  def mutate_neurons_topology2(stochastic_id,neuron_names_to_disturb,neurons_array_layers,only_for_add,max_neurons_on_layer) do    
     neuron_names_to_disturb = neuron_names_to_disturb                           
                                 |> Selector.select_elements()
-    mutated_neurons_array_layer = neuron_names_to_disturb 
-                                    |> duplicate_remove_neurons(neurons_array_layers,only_for_add)  
+    mutated_neurons_array_layer = neuron_names_to_disturb  
+                                    |> duplicate_remove_neurons(
+                                         neurons_array_layers,
+                                         only_for_add,
+                                         max_neurons_on_layer
+                                       )  
     stochastic_id
       |> NeuronStorage.set_neurons(mutated_neurons_array_layer)
   end
 
-  defp duplicate_remove_neurons(neuron_names_to_disturb,neurons_array_layers,only_for_add) do
+  defp duplicate_remove_neurons(neuron_names_to_disturb,neurons_array_layers,only_for_add,max_neurons_on_layer) do
     cond do
       (Enum.empty?(neuron_names_to_disturb))
         -> neurons_array_layers
       true
         -> neuron_names_to_disturb
-             |> duplicate_remove_neurons2(neurons_array_layers,only_for_add)
+             |> duplicate_remove_neurons2(neurons_array_layers,only_for_add,max_neurons_on_layer)
     end
   end
   
-  defp duplicate_remove_neurons2(neuron_names_to_disturb,neurons_array_layers,only_for_add) do
+  defp duplicate_remove_neurons2(neuron_names_to_disturb,neurons_array_layers,only_for_add,max_neurons_on_layer) do
     neuron_name = neuron_names_to_disturb
                     |> hd()
     neurons_array_layers = neuron_name
                             |> mutate_neurons_array_layers(
                                  neurons_array_layers,
-                                 only_for_add
+                                 only_for_add,
+                                 max_neurons_on_layer
                                )                             
     neuron_names_to_disturb
       |> tl()
-      |> duplicate_remove_neurons(neurons_array_layers,only_for_add)
+      |> duplicate_remove_neurons(neurons_array_layers,only_for_add,max_neurons_on_layer)
   end
   
-  defp mutate_neurons_array_layers(neuron_name,neurons_array_layers,only_for_add,mutated_layers \\ []) do
+  defp mutate_neurons_array_layers(neuron_name,neurons_array_layers,only_for_add,
+                                   max_neurons_on_layer,mutated_layers \\ []) do
     cond do
       (Enum.empty?(neurons_array_layers))
         -> mutated_layers
              |> Enum.reverse()
       true
         -> neuron_name
-             |> mutate_neurons_array_layers2(neurons_array_layers,only_for_add,mutated_layers)
+             |> mutate_neurons_array_layers2(neurons_array_layers,only_for_add,max_neurons_on_layer,mutated_layers)
     end
   end
   
-  defp mutate_neurons_array_layers2(neuron_name,neurons_array_layers,only_for_add,mutated_layers) do
+  defp mutate_neurons_array_layers2(neuron_name,neurons_array_layers,only_for_add,max_neurons_on_layer,mutated_layers) do
     neurons_array = neurons_array_layers 
                       |> hd()
     only_for_add = only_for_add or (neurons_array |> length() < 2)      
     mutated_neurons_array = neuron_name
-                              |> mutate_neurons_array(neurons_array,only_for_add)   
+                              |> mutate_neurons_array(neurons_array,only_for_add,max_neurons_on_layer)   
     neuron_name
       |> mutate_neurons_array_layers(
            neurons_array_layers
              |> tl(),
            only_for_add,
+           max_neurons_on_layer,
            [mutated_neurons_array | mutated_layers]
          )
   end
   
-  defp mutate_neurons_array(neuron_name,neurons_array,only_for_add,mutated_neurons_array \\ []) do
+  defp mutate_neurons_array(neuron_name,neurons_array,only_for_add,max_neurons_on_layer,mutated_neurons_array \\ []) do
     cond do
       (Enum.empty?(neurons_array))
         -> mutated_neurons_array
       true
         -> neuron_name
-             |> mutate_neurons_array2(neurons_array,only_for_add,mutated_neurons_array)
+             |> mutate_neurons_array2(neurons_array,only_for_add,max_neurons_on_layer,mutated_neurons_array)
     end
   end
   
-  defp mutate_neurons_array2(neuron_name,neurons_array,only_for_add,mutated_neurons_array) do
+  defp mutate_neurons_array2(neuron_name,neurons_array,only_for_add,
+                             max_neurons_on_layer,mutated_neurons_array) do
     neuron = neurons_array
               |> hd()
     [_,name,_,_,_,_,_,_] = neuron
@@ -102,6 +112,7 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                   neurons_array
                     |> tl(),
                   only_for_add,
+                  max_neurons_on_layer,
                   [
                     neuron 
                       | mutated_neurons_array
@@ -109,28 +120,31 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                 )
       true
         -> neuron_name
-             |> mutate_neurons_array3(neurons_array,only_for_add,mutated_neurons_array)
+             |> mutate_neurons_array3(neurons_array,only_for_add,max_neurons_on_layer,mutated_neurons_array)
     end
   end
   
-  defp mutate_neurons_array3(neuron_name,neurons_array,only_for_add,mutated_neurons_array) do
+  defp mutate_neurons_array3(neuron_name,neurons_array,only_for_add,max_neurons_on_layer,mutated_neurons_array) do
     neuron_name
       |> mutate_neurons_array(
            neurons_array
              |> tl(),
            only_for_add,
+           max_neurons_on_layer,
            neurons_array
              |> hd()
-             |> duplicate_or_disapear_neuron(only_for_add,mutated_neurons_array)
+             |> duplicate_or_disapear_neuron(only_for_add,max_neurons_on_layer,mutated_neurons_array)
          )
   end
   
-  defp duplicate_or_disapear_neuron(neuron,only_for_add,mutated_neurons_array) do
-    rand = :rand.uniform(2)
+  defp duplicate_or_disapear_neuron(neuron,only_for_add,max_neurons_on_layer,mutated_neurons_array) do
+    rand = mutated_neurons_array
+             |> decide_if_add_or_remove(max_neurons_on_layer)
     cond do
-      (rand == 1
-        and !only_for_add)
-          -> mutated_neurons_array
+      (rand == 0 
+        or (rand == 1
+          and !only_for_add))
+            -> mutated_neurons_array
       true
         -> [
              neuron,
@@ -138,6 +152,15 @@ defmodule Neurotick.Mutator.NeuronTopologyMutator do
                |> clone_neuron()
            ] 
              |> append_neurons(mutated_neurons_array)
+    end
+  end
+  
+  defp decide_if_add_or_remove(mutated_neurons_array,max_neurons_on_layer) do
+    cond do
+      (mutated_neurons_array |> length() >= max_neurons_on_layer)
+        -> 0
+      true
+        -> :rand.uniform(2)
     end
   end
   

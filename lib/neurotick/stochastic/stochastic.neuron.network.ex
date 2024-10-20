@@ -83,15 +83,16 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
   sensors_array: Sensors of Neural Network.
   neurons_array: Neurons Layers of Neural Network.
   actuators_array: Actuators of Neural Network.
-  max_attemps_neuron \\ nil: Max Attemps to find better weights disturbation. When nil will be calculated based on Neurons size.
-  max_attemps_topology \\ nil: Max Attemps to find better weights disturbation. When nil will be default to 1.
   round_precision \\ 2: Round decimal digits to be used on difference calculation between expected results and calculated results.
+  max_attemps_neuron \\ nil: Maximum Attemps to find better weights disturbation. When nil will be calculated based on Neurons size.
+  max_attemps_topology \\ nil: Maximum Attemps to find better weights disturbation. When nil will be default to 1.
+  max_neurons_on_layer \\ 10: Maximum layers to be in a neuron layer (for dynamic topology mutation).
   """
   def config(stochastic_id,sensors_array,neurons_array,actuators_array,
-             round_precision \\ 2,max_attemps_neuron \\ nil,max_attemps_topology \\ 1) do
+             round_precision \\ 2,max_attemps_neuron \\ nil,max_attemps_topology \\ 1,max_neurons_on_layer \\ 10) do
     stochastic_id
       |> NeuronStorage.config(sensors_array,neurons_array,actuators_array,
-                              round_precision,max_attemps_neuron,max_attemps_topology)
+                              round_precision,max_attemps_neuron,max_attemps_topology,max_neurons_on_layer)
   end
   
   
@@ -188,21 +189,23 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
     NeuronNetwork.config_sensors(network_id,sensors_array)
     NeuronNetwork.config_actuators(network_id,actuators_array)
     NeuronNetwork.config_neurons(network_id,neurons_array_layers)
-    :timer.sleep(1)
+    max_neurons_on_layer = stochastic_id
+                             |> NeuronStorage.get_max_neurons_on_layer()
+    max_neurons_on_layer
+      |> div(10) 
+      |> :timer.sleep()
     network_id
       |> NeuronNetwork.process_signals()
-    :timer.sleep(1)
-    try do
+    ((max_neurons_on_layer * 2) + 5) 
+      |> :timer.sleep()
     result = network_id 
                |> NeuronNetwork.extract_output()
-    :timer.sleep(1)
+    max_neurons_on_layer
+      |> div(10) 
+      |> :timer.sleep()
     network_id
       |> NeuronNetwork.stop_network()
     result
-    rescue
-      _-> [sensors_array,actuators_array,neurons_array_layers]
-            |> IO.inspect()
-    end
   end
     
 end
