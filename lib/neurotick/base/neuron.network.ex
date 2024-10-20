@@ -152,23 +152,12 @@ defmodule Neurotick.Base.NeuronNetwork do
   Extract final output result that was send to actuators layer.
   """
   def extract_output(network_id) do
-    try do
-      network_id
-        |> NeuronStorage.get_network_element(@actuators_id)
-        |> extract_output_actuators()
-    rescue
-      _-> network_id
-            |> retry_extract_output()
-    end
+    network_id
+      |> NeuronStorage.get_network_element(@actuators_id)
+      |> extract_output_actuators()
   end
   
-  defp retry_extract_output(network_id) do
-    ["retry_extract_output => ",network_id]
-      |> IO.inspect()
-    :timer.sleep(10)
-    network_id
-      |> extract_output()
-  end
+  
   
   defp extract_output_actuators(actuator_pids,results \\ []) do
     cond do

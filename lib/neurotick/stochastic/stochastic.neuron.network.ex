@@ -192,12 +192,17 @@ defmodule Neurotick.Stochastic.StochasticNeuronNetwork do
     network_id
       |> NeuronNetwork.process_signals()
     :timer.sleep(1)
+    try do
     result = network_id 
                |> NeuronNetwork.extract_output()
     :timer.sleep(1)
     network_id
       |> NeuronNetwork.stop_network()
     result
+    rescue
+      _-> [sensors_array,actuators_array,neurons_array_layers]
+            |> IO.inspect()
+    end
   end
     
 end
